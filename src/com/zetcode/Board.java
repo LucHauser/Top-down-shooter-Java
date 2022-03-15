@@ -12,30 +12,21 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
-
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.Timer;
-
 import java.awt.Graphics2D;
-
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.awt.GraphicsConfiguration;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
-
-
 public class Board extends JPanel implements ActionListener {
 
     private final int B_WIDTH = 500;
     private final int B_HEIGHT = 500;
     private final int DOT_SIZE = 25;
-    // private final int ALL_DOTS = 500;
     private final int RAND_POS = 29;
-    private final int DELAY =40;
+    private final int DELAY = 40;
 
     private Player player;
     private int apple_x;
@@ -44,10 +35,7 @@ public class Board extends JPanel implements ActionListener {
     private boolean inGame = true;
 
     private Image apple;
-    private Image playerImg;
     private Image bulletImg;
-
-    private boolean isFirst = true;
 
 
     private ArrayList<Bullet> bullets = new ArrayList<Bullet>();
@@ -80,16 +68,13 @@ public class Board extends JPanel implements ActionListener {
         ImageIcon iia = new ImageIcon("src/resources/apple.png");
         apple = iia.getImage();
 
-        ImageIcon iih = new ImageIcon("src/resources/player1.gif");
-        playerImg = iih.getImage();
-
-        ImageIcon iib = new ImageIcon("src/resources/dot.png");
+        ImageIcon iib = new ImageIcon("src/resources/bullet.png");
         bulletImg = iib.getImage();
     }
 
     private void initGame() {
 
-        player = new Player(250, 250, false, false, false, true);
+        player = new Player(250, 250, 0);
 
         locateApple();
 
@@ -140,7 +125,7 @@ public class Board extends JPanel implements ActionListener {
             try {
 
                 BufferedImage originalImage = ImageIO.read(new File("src/resources/player1.gif"));
-                BufferedImage subImage = rotateImage(originalImage, 45);
+                BufferedImage subImage = rotateImage(originalImage, player.rotation);
                 g.drawImage(subImage, player.x, player.y, this);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -156,63 +141,16 @@ public class Board extends JPanel implements ActionListener {
     public static BufferedImage rotateImage(BufferedImage imageToRotate, double angle) {
         int widthOfImage = imageToRotate.getWidth();
         int heightOfImage = imageToRotate.getHeight();
-        int typeOfImage = imageToRotate.getType();
 
         BufferedImage newImageFromBuffer = new BufferedImage(widthOfImage, heightOfImage, java.awt.Transparency.TRANSLUCENT);
 
         Graphics2D graphics2D = newImageFromBuffer.createGraphics();
 
-        // double sin = Math.abs(Math.sin(Math.toRadians(angle))), cos = Math.abs(Math.cos(Math.toRadians(angle)));
         graphics2D.rotate(Math.toRadians(angle), widthOfImage / 2, heightOfImage / 2);
         graphics2D.drawImage(imageToRotate, null, 0, 0);
 
         return newImageFromBuffer;
     }
-
-    // public static BufferedImage rotate(Image im, double angle) {
-    //     BufferedImage bi = new BufferedImage(im.getWidth(null),im.getHeight(null),BufferedImage.TYPE_INT_RGB);
-    //     // double sin = Math.abs(Math.sin(Math.toRadians(angle))), cos = Math.abs(Math.cos(Math.toRadians(angle)));
-    //     // int w = bi.getWidth(), h = bi.getHeight();
-    //     // int neww = (int)Math.floor(w*cos+h*sin), newh = (int) Math.floor(h * cos + w * sin);
-    //     Graphics2D g = bi.createGraphics();
-    //     // g.translate((neww - w) / 2, (newh - h) / 2);
-    //     // g.translate(w * 0.5, h * 0.5);
-    //     // g.rotate(angle, w / 2, h / 2);
-    //     // g.rotate(Math.toRadians(angle), 0, 0);
-    //     g.drawRenderedImage(bi, null);
-    //     g.dispose();
-    //     return bi;
-    // }
-
-
-    // public static BufferedImage imageToBufferedImage(Image im) {
-    //     BufferedImage bi = new BufferedImage(im.getWidth(null),im.getHeight(null),BufferedImage.TYPE_INT_RGB);
-    //     Graphics bg = bi.getGraphics();
-    //     // System.out.println("Widht " + bi.getWidth());
-    //     bg.drawImage(im, 0, 0, null);
-    //     bg.dispose();
-    //     return bi;
-    // }
-
-    // public static Graphics2D rotate(BufferedImage image, double angle) {
-    //     double sin = Math.abs(Math.sin(angle)), cos = Math.abs(Math.cos(angle));
-    //     int w = image.getWidth(), h = image.getHeight();
-    //     int neww = (int)Math.floor(w*cos+h*sin), newh = (int) Math.floor(h * cos + w * sin);
-    //     GraphicsConfiguration gc = getDefaultConfiguration();
-    //     BufferedImage result = gc.createCompatibleImage(neww, newh);
-    //     Graphics2D g = result.createGraphics();
-    //     g.translate((neww - w) / 2, (newh - h) / 2);
-    //     g.rotate(angle, w / 2, h / 2);
-    //     g.drawRenderedImage(image, null);
-    //     g.dispose();
-    //     return g;
-    // }
-
-    // private static GraphicsConfiguration getDefaultConfiguration() {
-    //     GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-    //     GraphicsDevice gd = ge.getDefaultScreenDevice();
-    //     return gd.getDefaultConfiguration();
-    // }
 
     private void gameOver(Graphics g) {
 
@@ -288,7 +226,7 @@ public class Board extends JPanel implements ActionListener {
         System.out.println("Shot");
         int offsetX = 50;
         int offsetY = 33;
-        Bullet bullet = new Bullet(player.x + offsetX, player.y + offsetY, player.u, player.d, player.l, player.r);
+        Bullet bullet = new Bullet(player.x + offsetX, player.y + offsetY, false, false, false, true);
         bullets.add(bullet);
 
     }
@@ -322,24 +260,40 @@ public class Board extends JPanel implements ActionListener {
 
             int key = e.getKeyCode();
 
-            if ((key == KeyEvent.VK_LEFT)) {
+            if ((key == KeyEvent.VK_A)) {
                 player.x -= DOT_SIZE;
             }
 
-            if ((key == KeyEvent.VK_RIGHT)) {
+            if ((key == KeyEvent.VK_D)) {
                 player.x += DOT_SIZE;
             }
 
-            if ((key == KeyEvent.VK_UP)) {
+            if ((key == KeyEvent.VK_W)) {
                 player.y -= DOT_SIZE;
             }
 
-            if ((key == KeyEvent.VK_DOWN)) {
+            if ((key == KeyEvent.VK_S)) {
                 player.y += DOT_SIZE;
             }
 
             if ((key == KeyEvent.VK_SPACE)) {
                 Shoot();
+            }
+
+            if ((key == KeyEvent.VK_UP)) {
+                player.rotation = -90;
+            }
+
+            if ((key == KeyEvent.VK_DOWN)) {
+                player.rotation = 90;
+            }
+
+            if ((key == KeyEvent.VK_RIGHT)) {
+                player.rotation = 0;
+            }
+
+            if ((key == KeyEvent.VK_LEFT)) {
+                player.rotation = 180;
             }
         }
     }
