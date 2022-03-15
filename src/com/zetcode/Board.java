@@ -13,6 +13,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.Timer;
@@ -20,6 +21,8 @@ import javax.swing.Timer;
 import java.awt.Graphics2D;
 
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
@@ -132,12 +135,16 @@ public class Board extends JPanel implements ActionListener {
         if (inGame) {
             Image bg = Toolkit.getDefaultToolkit().getImage("src/resources/ground.jpg");
             g.drawImage(bg, 0, 0, null);
-
             g.drawImage(apple, apple_x, apple_y, this);
 
-            BufferedImage img = imageToBufferedImage(playerImg);
-            g.drawImage(playerImg, player.x, player.y, this);
-            rotate(img, 0);
+            try {
+
+                BufferedImage originalImage = ImageIO.read(new File("src/resources/player1.gif"));
+                BufferedImage subImage = rotateImage(originalImage, 45);
+                g.drawImage(subImage, player.x, player.y, this);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             Toolkit.getDefaultToolkit().sync();
 
         } else {
@@ -146,34 +153,66 @@ public class Board extends JPanel implements ActionListener {
         }
     }
 
+    public static BufferedImage rotateImage(BufferedImage imageToRotate, double angle) {
+        int widthOfImage = imageToRotate.getWidth();
+        int heightOfImage = imageToRotate.getHeight();
+        int typeOfImage = imageToRotate.getType();
 
-    public static BufferedImage imageToBufferedImage(Image im) {
-        BufferedImage bi = new BufferedImage(im.getWidth(null),im.getHeight(null),BufferedImage.TYPE_INT_RGB);
-        Graphics bg = bi.getGraphics();
-        bg.drawImage(im, 0, 0, null);
-        bg.dispose();
-        return bi;
+        BufferedImage newImageFromBuffer = new BufferedImage(widthOfImage, heightOfImage, java.awt.Transparency.TRANSLUCENT);
+
+        Graphics2D graphics2D = newImageFromBuffer.createGraphics();
+
+        // double sin = Math.abs(Math.sin(Math.toRadians(angle))), cos = Math.abs(Math.cos(Math.toRadians(angle)));
+        graphics2D.rotate(Math.toRadians(angle), widthOfImage / 2, heightOfImage / 2);
+        graphics2D.drawImage(imageToRotate, null, 0, 0);
+
+        return newImageFromBuffer;
     }
 
-    public static BufferedImage rotate(BufferedImage image, double angle) {
-        double sin = Math.abs(Math.sin(angle)), cos = Math.abs(Math.cos(angle));
-        int w = image.getWidth(), h = image.getHeight();
-        int neww = (int)Math.floor(w*cos+h*sin), newh = (int) Math.floor(h * cos + w * sin);
-        GraphicsConfiguration gc = getDefaultConfiguration();
-        BufferedImage result = gc.createCompatibleImage(neww, newh);
-        Graphics2D g = result.createGraphics();
-        g.translate((neww - w) / 2, (newh - h) / 2);
-        g.rotate(angle, w / 2, h / 2);
-        g.drawRenderedImage(image, null);
-        g.dispose();
-        return result;
-    }
+    // public static BufferedImage rotate(Image im, double angle) {
+    //     BufferedImage bi = new BufferedImage(im.getWidth(null),im.getHeight(null),BufferedImage.TYPE_INT_RGB);
+    //     // double sin = Math.abs(Math.sin(Math.toRadians(angle))), cos = Math.abs(Math.cos(Math.toRadians(angle)));
+    //     // int w = bi.getWidth(), h = bi.getHeight();
+    //     // int neww = (int)Math.floor(w*cos+h*sin), newh = (int) Math.floor(h * cos + w * sin);
+    //     Graphics2D g = bi.createGraphics();
+    //     // g.translate((neww - w) / 2, (newh - h) / 2);
+    //     // g.translate(w * 0.5, h * 0.5);
+    //     // g.rotate(angle, w / 2, h / 2);
+    //     // g.rotate(Math.toRadians(angle), 0, 0);
+    //     g.drawRenderedImage(bi, null);
+    //     g.dispose();
+    //     return bi;
+    // }
 
-    private static GraphicsConfiguration getDefaultConfiguration() {
-        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-        GraphicsDevice gd = ge.getDefaultScreenDevice();
-        return gd.getDefaultConfiguration();
-    }
+
+    // public static BufferedImage imageToBufferedImage(Image im) {
+    //     BufferedImage bi = new BufferedImage(im.getWidth(null),im.getHeight(null),BufferedImage.TYPE_INT_RGB);
+    //     Graphics bg = bi.getGraphics();
+    //     // System.out.println("Widht " + bi.getWidth());
+    //     bg.drawImage(im, 0, 0, null);
+    //     bg.dispose();
+    //     return bi;
+    // }
+
+    // public static Graphics2D rotate(BufferedImage image, double angle) {
+    //     double sin = Math.abs(Math.sin(angle)), cos = Math.abs(Math.cos(angle));
+    //     int w = image.getWidth(), h = image.getHeight();
+    //     int neww = (int)Math.floor(w*cos+h*sin), newh = (int) Math.floor(h * cos + w * sin);
+    //     GraphicsConfiguration gc = getDefaultConfiguration();
+    //     BufferedImage result = gc.createCompatibleImage(neww, newh);
+    //     Graphics2D g = result.createGraphics();
+    //     g.translate((neww - w) / 2, (newh - h) / 2);
+    //     g.rotate(angle, w / 2, h / 2);
+    //     g.drawRenderedImage(image, null);
+    //     g.dispose();
+    //     return g;
+    // }
+
+    // private static GraphicsConfiguration getDefaultConfiguration() {
+    //     GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+    //     GraphicsDevice gd = ge.getDefaultScreenDevice();
+    //     return gd.getDefaultConfiguration();
+    // }
 
     private void gameOver(Graphics g) {
 
