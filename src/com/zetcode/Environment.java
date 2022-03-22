@@ -29,7 +29,6 @@ public class Environment extends JPanel implements ActionListener {
     private final int DELAY = 40;
 
     private Player player;
-    private Player enemy;
 
     private boolean inGame = true;
 
@@ -62,8 +61,10 @@ public class Environment extends JPanel implements ActionListener {
     private void initGame() {
 
         player = new Player(B_WIDTH/2, B_HEIGHT/2, 0);
-        enemy = new Player(100, B_HEIGHT/2, -90);
-        enemys.add(enemy);
+        Player fEnemy = new Player(100, B_HEIGHT/2, -90);
+        enemys.add(fEnemy);
+        Player sEnemy = new Player(400, B_HEIGHT/2, 180);
+        enemys.add(sEnemy);
 
         // Sprite enemy = new Sprite(100, 250, "src/resources/enemy.png");
         // Sprite bulletSprite = new Sprite(120, 240, "src/resources/round.png");
@@ -105,19 +106,19 @@ public class Environment extends JPanel implements ActionListener {
             ArrayList<Player> toDeleteEnemys = new ArrayList<Player>();
 
             for (Bullet bullet : bullets) {
-                int enemyX = enemy.x;
-                int enemyY = enemy.y;
-                Sprite enemySprite = new Sprite(enemyX, enemyY, "src/resources/enemy.png");
-                Sprite bulletSprite = new Sprite(bullet.x, bullet.y, "src/resources/round.png");
+                for (Player enemy : enemys) {
+                    Sprite enemySprite = new Sprite(enemy.x, enemy.y, "src/resources/enemy.png");
+                    Sprite bulletSprite = new Sprite(bullet.x, bullet.y, "src/resources/round.png");
 
-                Rectangle enemyRect = enemySprite.getBounds();
-                Rectangle bulletrect = bulletSprite.getBounds();
+                    Rectangle enemyRect = enemySprite.getBounds();
+                    Rectangle bulletrect = bulletSprite.getBounds();
 
-                // g.drawRect(enemyRect.x, enemyRect.y, (int)enemyRect.getWidth(), (int)enemyRect.getHeight());
+                    // g.drawRect(enemyRect.x, enemyRect.y, (int)enemyRect.getWidth(), (int)enemyRect.getHeight());
 
-                if (enemyRect.intersects(bulletrect)) {
-                    toDeleteEnemys.add(enemy);
-                    toDeleteBullets.add(bullet);
+                    if (enemyRect.intersects(bulletrect)) {
+                        toDeleteEnemys.add(enemy);
+                        toDeleteBullets.add(bullet);
+                    }
                 }
             }
 
@@ -145,29 +146,31 @@ public class Environment extends JPanel implements ActionListener {
                 e.printStackTrace();
             }
             try {
-                if (enemy.x < player.x)
-                {
-                    enemy.x += 1;
-                }
-                if (enemy.x > player.x)
-                {
-                    enemy.x -= 1;
-                }
-                if (enemy.y < player.y)
-                {
-                    enemy.y += 1;
-                }
-                if (enemy.y > player.y)
-                {
-                    enemy.y -= 1;
-                }
-                double dx = player.x - enemy.x;
-                double dy = player.y - enemy.y;
-                enemy.rotation = (Math.toDegrees(Math.atan2(dy, dx))-90);
+                for (Player enemy : enemys) {
+                    if (enemy.x < player.x)
+                    {
+                        enemy.x += 1;
+                    }
+                    if (enemy.x > player.x)
+                    {
+                        enemy.x -= 1;
+                    }
+                    if (enemy.y < player.y)
+                    {
+                        enemy.y += 1;
+                    }
+                    if (enemy.y > player.y)
+                    {
+                        enemy.y -= 1;
+                    }
+                    double dx = player.x - enemy.x;
+                    double dy = player.y - enemy.y;
+                    enemy.rotation = (Math.toDegrees(Math.atan2(dy, dx))-90);
 
-                BufferedImage originalImage = ImageIO.read(new File("src/resources/enemy.png"));
-                BufferedImage subImage = rotateImage(originalImage, enemy.rotation);
-                g.drawImage(subImage, enemy.x, enemy.y, this);
+                    BufferedImage originalImage = ImageIO.read(new File("src/resources/enemy.png"));
+                    BufferedImage subImage = rotateImage(originalImage, enemy.rotation);
+                    g.drawImage(subImage, enemy.x, enemy.y, this);
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
