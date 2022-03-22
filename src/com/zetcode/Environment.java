@@ -102,6 +102,22 @@ public class Environment extends JPanel implements ActionListener {
                 e.printStackTrace();
             }
             try {
+                if (enemy.x < player.x)
+                {
+                    enemy.x += 1;
+                }
+                if (enemy.x > player.x)
+                {
+                    enemy.x -= 1;
+                }
+                if (enemy.y < player.y)
+                {
+                    enemy.y += 1;
+                }
+                if (enemy.y > player.y)
+                {
+                    enemy.y -= 1;
+                }
                 double dx = player.x - enemy.x;
                 double dy = player.y - enemy.y;
                 enemy.rotation = (Math.toDegrees(Math.atan2(dy, dx))-90);
