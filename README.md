@@ -1,7 +1,5 @@
-# Java-Snake-Game
-Java Snake game source code
+# TOPDOWNSHOOTER
+This is a 2D shooter, wiritten in Java.
 
-http://zetcode.com/javagames/snake/  
 
-![Snake game screenshot](snake.png)
-# TopDownShooter
+![Screenshot](game.png)

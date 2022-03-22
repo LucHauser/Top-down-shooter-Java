@@ -35,8 +35,9 @@ public class Environment extends JPanel implements ActionListener {
 
     private int maxEnemys = 3;
     private int[][] spawnPoints = {{-100,-100},{550,-50},{510,550},{550,550}};
-    private int[] hardrange = {5, 10, 13, 15};
-    private int kills = 0;
+    // private int[] hardrange = {5, 10, 13, 15, 0};
+    private int counter = 0;
+    private int kills = 16;
 
     private ArrayList<Bullet> bullets = new ArrayList<Bullet>();
     private ArrayList<Character> enemys = new ArrayList<Character>();
@@ -243,10 +244,18 @@ public class Environment extends JPanel implements ActionListener {
             Character newEnemy = new Character(randomPoint[0], randomPoint[1], 0);
             enemys.add(newEnemy);
 
-            if (kills > hardrange[0] && hardrange != null)
+            // if (kills > hardrange[0] && hardrange[0] != 0)
+            // {
+            //     maxEnemys++;
+            //     hardrange = removeFirstElement(hardrange);
+            // }
+
+            counter++;
+
+            if (counter >= 20)
             {
+                counter = 0;
                 maxEnemys++;
-                hardrange = removeFirstElement(hardrange);
             }
         }
     }
