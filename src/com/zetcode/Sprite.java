@@ -12,8 +12,6 @@ public class Sprite {
     boolean visible;
     private int width, height;
 
-
-
     public Sprite(int x, int y, String path) {
         this.path = path;
         ImageIcon im = new ImageIcon(path);
@@ -25,15 +23,8 @@ public class Sprite {
         this.y = y;
     }
 
-    //rest of your getters/setters
-
     //this will be used for collision detection
     public Rectangle getBounds() {
         return new Rectangle(x, y, width, height);
     }
-
-
-    // public void move() {
-    //     //move code goes here
-    // }
 }

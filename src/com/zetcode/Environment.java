@@ -12,6 +12,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+import java.util.Random;
+
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 import javax.swing.Timer;
@@ -28,13 +30,16 @@ public class Environment extends JPanel implements ActionListener {
     private final int DOT_SIZE = 25;
     private final int DELAY = 40;
 
-    private Player player;
-
+    private Character player;
     private boolean inGame = true;
 
+    private int maxEnemys = 3;
+    private int[][] spawnPoints = {{-100,-100},{550,-50},{510,550},{550,550}};
+    private int[] hardrange = {5, 10, 13, 15};
+    private int kills = 0;
 
     private ArrayList<Bullet> bullets = new ArrayList<Bullet>();
-    private ArrayList<Player> enemys = new ArrayList<Player>();
+    private ArrayList<Character> enemys = new ArrayList<Character>();
 
     public Environment() {
 
@@ -49,7 +54,6 @@ public class Environment extends JPanel implements ActionListener {
     }
 
     private void initBoard() {
-
         addKeyListener(new TAdapter());
         setBackground(Color.black);
         setFocusable(true);
@@ -59,35 +63,22 @@ public class Environment extends JPanel implements ActionListener {
     }
 
     private void initGame() {
+        player = new Character(B_WIDTH/2, B_HEIGHT/2, 0);
+        Character fEnemy = new Character(100, B_HEIGHT/2, -90);
 
-        player = new Player(B_WIDTH/2, B_HEIGHT/2, 0);
-        Player fEnemy = new Player(100, B_HEIGHT/2, -90);
         enemys.add(fEnemy);
-        Player sEnemy = new Player(400, B_HEIGHT/2, 180);
+        Character sEnemy = new Character(400, B_HEIGHT/2, 180);
         enemys.add(sEnemy);
-
-        // Sprite enemy = new Sprite(100, 250, "src/resources/enemy.png");
-        // Sprite bulletSprite = new Sprite(120, 240, "src/resources/round.png");
-        // Rectangle enemyRect = enemy.getBounds();
-        // Rectangle bulletrect = bulletSprite.getBounds();
-
-        // System.out.println("x" + enemyRect.getWidth() + " y" + enemyRect.getHeight());
-        // System.out.println("x" + enemyRect.getCenterX() + " y" + enemyRect.getY());
-        // if (enemyRect.intersects(bulletrect )) {
-        //     System.out.println("Collison happend");
-        // }
-        // System.exit(0);
     }
-
 
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         doDrawing(g);
-        DrawBullet(g);
+        SpawnEnemys();
     }
 
-    private void DrawBullet(Graphics g)
+    private void DrawBullets(Graphics g)
     {
         if (inGame) {
             for (Bullet bullet : bullets) {
@@ -101,37 +92,45 @@ public class Environment extends JPanel implements ActionListener {
                     e.printStackTrace();
                 }
             }
-
-            ArrayList<Bullet> toDeleteBullets = new ArrayList<Bullet>();
-            ArrayList<Player> toDeleteEnemys = new ArrayList<Player>();
-
-            for (Bullet bullet : bullets) {
-                for (Player enemy : enemys) {
-                    Sprite enemySprite = new Sprite(enemy.x, enemy.y, "src/resources/enemy.png");
-                    Sprite bulletSprite = new Sprite(bullet.x, bullet.y, "src/resources/round.png");
-
-                    Rectangle enemyRect = enemySprite.getBounds();
-                    Rectangle bulletrect = bulletSprite.getBounds();
-
-                    // g.drawRect(enemyRect.x, enemyRect.y, (int)enemyRect.getWidth(), (int)enemyRect.getHeight());
-
-                    if (enemyRect.intersects(bulletrect)) {
-                        toDeleteEnemys.add(enemy);
-                        toDeleteBullets.add(bullet);
-                    }
-                }
-            }
-
-            for (Bullet bullet : toDeleteBullets) {
-                bullets.remove(bullet);
-            }
-
-            for (Player enemy : toDeleteEnemys) {
-                enemys.remove(enemy);
-                System.out.println("x");
-            }
+            checkBulletCollison();
         }
     }
+
+    private void DrawEnemys(Graphics g)
+    {
+        try {
+            checkPlayerCollsison();
+
+            for (Character enemy : enemys) {
+                if (enemy.x < player.x)
+                {
+                    enemy.x += 1;
+                }
+                if (enemy.x > player.x)
+                {
+                    enemy.x -= 1;
+                }
+                if (enemy.y < player.y)
+                {
+                    enemy.y += 1;
+                }
+                if (enemy.y > player.y)
+                {
+                    enemy.y -= 1;
+                }
+                double dx = player.x - enemy.x;
+                double dy = player.y - enemy.y;
+                enemy.rotation = (Math.toDegrees(Math.atan2(dy, dx))-90);
+
+                BufferedImage originalImage = ImageIO.read(new File("src/resources/enemy.png"));
+                BufferedImage subImage = rotateImage(originalImage, enemy.rotation);
+                g.drawImage(subImage, enemy.x, enemy.y, this);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void doDrawing(Graphics g) {
         if (inGame) {
             Image bg = Toolkit.getDefaultToolkit().getImage("src/resources/ground.jpg");
@@ -145,37 +144,16 @@ public class Environment extends JPanel implements ActionListener {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            try {
-                for (Player enemy : enemys) {
-                    if (enemy.x < player.x)
-                    {
-                        enemy.x += 1;
-                    }
-                    if (enemy.x > player.x)
-                    {
-                        enemy.x -= 1;
-                    }
-                    if (enemy.y < player.y)
-                    {
-                        enemy.y += 1;
-                    }
-                    if (enemy.y > player.y)
-                    {
-                        enemy.y -= 1;
-                    }
-                    double dx = player.x - enemy.x;
-                    double dy = player.y - enemy.y;
-                    enemy.rotation = (Math.toDegrees(Math.atan2(dy, dx))-90);
+            String killsText = "kills: " + kills;
+            Font small = new Font("Helvetica", Font.BOLD, 14);
+            FontMetrics metr = getFontMetrics(small);
 
-                    BufferedImage originalImage = ImageIO.read(new File("src/resources/enemy.png"));
-                    BufferedImage subImage = rotateImage(originalImage, enemy.rotation);
-                    g.drawImage(subImage, enemy.x, enemy.y, this);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            g.setColor(Color.yellow);
+            g.setFont(small);
+            g.drawString(killsText, (B_WIDTH - metr.stringWidth(killsText)) / 2, 20);
+            DrawEnemys(g);
+            DrawBullets(g);
             Toolkit.getDefaultToolkit().sync();
-
         } else {
 
             gameOver(g);
@@ -203,6 +181,7 @@ public class Environment extends JPanel implements ActionListener {
         FontMetrics metr = getFontMetrics(small);
 
         g.setColor(Color.white);
+        setBackground(Color.red);
         g.setFont(small);
         g.drawString(msg, (B_WIDTH - metr.stringWidth(msg)) / 2, B_HEIGHT / 2);
     }
@@ -256,32 +235,82 @@ public class Environment extends JPanel implements ActionListener {
         bullets.add(bullet);
     }
 
+    private void SpawnEnemys()
+    {
+        if (enemys.size() < maxEnemys)
+        {
+            int[] randomPoint = spawnPoints[new Random().nextInt(spawnPoints.length)];
+            Character newEnemy = new Character(randomPoint[0], randomPoint[1], 0);
+            enemys.add(newEnemy);
+
+            if (kills > hardrange[0] && hardrange != null)
+            {
+                maxEnemys++;
+                hardrange = removeFirstElement(hardrange);
+            }
+        }
+    }
+
+    public static int[] removeFirstElement(int[] arr) {
+        int newArr[] = new int[arr.length - 1];
+        for (int i = 1; i < arr.length; i++) {
+            newArr[i-1] = arr[i];
+        }
+        return newArr;
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
 
         if (inGame) {
             repaint();
-            // checkCollison();
         }
-        repaint();
     }
 
-    // private void checkCollison()
-    // {
-        // for (Bullet bullet : bullets) {
-        //     int enemyX = enemy.x;
-        //     int enemyY = enemy.y;
-        //     Sprite enemy = new Sprite(enemyX, enemyY, "src/resources/enemy.png");
-        //     Sprite bulletSprite = new Sprite(bullet.x, bullet.y, "src/resources/round.png");
+    private void checkPlayerCollsison()
+    {
+        for (Character enemy : enemys) {
+            Sprite enemySprite = new Sprite(enemy.x, enemy.y, "src/resources/enemy.png");
+            Sprite playeSprite = new Sprite(player.x, player.y, "src/resources/player.gif");
 
-        //     Rectangle enemyRect = enemy.getBounds();
-        //     Rectangle bulletrect = bulletSprite.getBounds();
+            Rectangle enemyRect = enemySprite.getBounds();
+            Rectangle playerRect = playeSprite.getBounds();
+            enemyRect.setSize(enemyRect.width/2, enemyRect.height/2);
+            if (enemyRect.intersects(playerRect)) {
+                inGame = false;
+            }
+        }
+    }
 
-        //     if (enemyRect.intersects(bulletrect)) {
-        //         System.out.println("Collison happend");
-        //     }
-        // }
-    // }
+    private void checkBulletCollison()
+    {
+        ArrayList<Bullet> toDeleteBullets = new ArrayList<Bullet>();
+        ArrayList<Character> toDeleteEnemys = new ArrayList<Character>();
+
+        for (Bullet bullet : bullets) {
+            for (Character enemy : enemys) {
+                Sprite enemySprite = new Sprite(enemy.x, enemy.y, "src/resources/enemy.png");
+                Sprite bulletSprite = new Sprite(bullet.x, bullet.y, "src/resources/round.png");
+
+                Rectangle enemyRect = enemySprite.getBounds();
+                Rectangle bulletrect = bulletSprite.getBounds();
+
+                if (enemyRect.intersects(bulletrect)) {
+                    toDeleteEnemys.add(enemy);
+                    toDeleteBullets.add(bullet);
+                    kills++;
+                }
+            }
+        }
+
+        for (Bullet bullet : toDeleteBullets) {
+            bullets.remove(bullet);
+        }
+
+        for (Character enemy : toDeleteEnemys) {
+            enemys.remove(enemy);
+        }
+    }
 
     private class TAdapter extends KeyAdapter {
 
