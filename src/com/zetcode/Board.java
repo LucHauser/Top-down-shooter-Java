@@ -59,27 +59,12 @@ public class Board extends JPanel implements ActionListener {
         setFocusable(true);
 
         setPreferredSize(new Dimension(B_WIDTH, B_HEIGHT));
-        loadImages();
         initGame();
-    }
-
-    private void loadImages() {
-
-        ImageIcon iia = new ImageIcon("src/resources/apple.png");
-        apple = iia.getImage();
-
-        ImageIcon iib = new ImageIcon("src/resources/bullet.png");
-        bulletImg = iib.getImage();
     }
 
     private void initGame() {
 
         player = new Player(250, 250, 0);
-
-        locateApple();
-
-        // timer = new Timer(DELAY, this);
-        // timer.start();
     }
 
 
@@ -88,31 +73,21 @@ public class Board extends JPanel implements ActionListener {
         super.paintComponent(g);
         doDrawing(g);
         DrawBullet(g);
-
-        for (Bullet bullet : bullets) {
-            if (bullet.l) {
-                bullet.x -= DOT_SIZE;
-            }
-
-            if (bullet.r) {
-                bullet.x += DOT_SIZE;
-            }
-
-            if (bullet.u) {
-                bullet.y += DOT_SIZE;
-            }
-
-            if ((bullet.d)) {
-                bullet.y -= DOT_SIZE;
-            }
-        }
     }
 
     private void DrawBullet(Graphics g)
     {
         if (inGame) {
             for (Bullet bullet : bullets) {
-                g.drawImage(bulletImg, bullet.x, bullet.y, this);
+                try {
+
+                    BufferedImage originalImage = ImageIO.read(new File("src/resources/round.png"));
+                    BufferedImage subImage = rotateImage(originalImage, bullet.rotation);
+                    bullet.updatePostion();
+                    g.drawImage(subImage, bullet.x += bullet.xOffset, bullet.y += bullet.yOffet, this);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -120,7 +95,6 @@ public class Board extends JPanel implements ActionListener {
         if (inGame) {
             Image bg = Toolkit.getDefaultToolkit().getImage("src/resources/ground.jpg");
             g.drawImage(bg, 0, 0, null);
-            g.drawImage(apple, apple_x, apple_y, this);
 
             try {
 
@@ -163,93 +137,62 @@ public class Board extends JPanel implements ActionListener {
         g.drawString(msg, (B_WIDTH - metr.stringWidth(msg)) / 2, B_HEIGHT / 2);
     }
 
-    // private void checkApple() {
-
-    //     if ((x[0] == apple_x) && (y[0] == apple_y)) {
-
-    //         dots++;
-    //         locateApple();
-    //     }
-    // }
-
-    // private void movePlayer() {
-
-    //     if (leftDirection) {
-    //         x[0] -= DOT_SIZE;
-    //     }
-
-    //     if (rightDirection) {
-    //         x[0] += DOT_SIZE;
-    //     }
-
-    //     if (upDirection) {
-    //         y[0] -= DOT_SIZE;
-    //     }
-
-    //     if (downDirection) {
-    //         y[0] += DOT_SIZE;
-    //     }
-    // }
-
-    // private void checkCollision() {
-
-    //     for (int z = dots; z > 0; z--) {
-
-    //     if ((z > 4) && (x[0] == x[z]) && (y[0] == y[z])) {
-    //     inGame = false;
-    //     }
-    //     }
-
-    //     if (y[0] >= B_HEIGHT) {
-    //         inGame = false;
-    //     }
-
-    //     if (y[0] < 0) {
-    //         inGame = false;
-    //     }
-
-    //     if (x[0] >= B_WIDTH) {
-    //         inGame = false;
-    //     }
-
-    //     if (x[0] < 0) {
-    //         inGame = false;
-    //     }
-
-    //     if (!inGame) {
-    //         timer.stop();
-    //     }
-    // }
-
     private void Shoot()
     {
         System.out.println("Shot");
-        int offsetX = 50;
-        int offsetY = 33;
-        Bullet bullet = new Bullet(player.x + offsetX, player.y + offsetY, false, false, false, true);
+        int xOffest = 0;
+        int yOffset = 0;
+
+        if (player.rotation == 0)
+        {
+            xOffest = 50;
+            yOffset = 36;
+        }
+        else if (player.rotation == 45)
+        {
+            xOffest = 34;
+            yOffset = 49;
+        }
+        else if (player.rotation == 90)
+        {
+            xOffest = 14;
+            yOffset = 48;
+        }
+        else if (player.rotation == 135)
+        {
+            xOffest = 2;
+            yOffset = 27;
+        }
+        else if (player.rotation == 180)
+        {
+            xOffest = 3;
+            yOffset = 8;
+        }
+        else if (player.rotation == 225)
+        {
+            xOffest = 22;
+            yOffset = 0;
+        }
+        else if (player.rotation == 270)
+        {
+            xOffest = 40;
+            yOffset = -2;
+        }
+        else if (player.rotation == 315)
+        {
+            xOffest = 56;
+            yOffset = 12;
+        }
+        Bullet bullet = new Bullet(player.x + xOffest, player.y + yOffset, player.rotation);
         bullets.add(bullet);
-
-    }
-
-    private void locateApple() {
-
-        int r = (int) (Math.random() * RAND_POS);
-        apple_x = ((r * DOT_SIZE));
-
-        r = (int) (Math.random() * RAND_POS);
-        apple_y = ((r * DOT_SIZE));
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
 
         if (inGame) {
-
-            // checkApple();
-            // checkCollision();
             repaint();
         }
-
         repaint();
     }
 
@@ -280,21 +223,31 @@ public class Board extends JPanel implements ActionListener {
                 Shoot();
             }
 
-            if ((key == KeyEvent.VK_UP)) {
-                player.rotation = -90;
-            }
-
-            if ((key == KeyEvent.VK_DOWN)) {
-                player.rotation = 90;
-            }
-
             if ((key == KeyEvent.VK_RIGHT)) {
-                player.rotation = 0;
+                if (player.rotation == 315)
+                {
+                    player.rotation = 0;
+                }
+                else{
+                    player.rotation += 45;
+                }
             }
 
             if ((key == KeyEvent.VK_LEFT)) {
-                player.rotation = 180;
+                if (player.rotation ==  0)
+                {
+                    player.rotation = 315;
+                }
+                else{
+                    player.rotation -= 45;
+                }
             }
+
+            if ((key == KeyEvent.VK_X)) {
+                System.exit(0);
+            }
+
+            System.out.println(player.rotation);
         }
     }
 }
