@@ -13,34 +13,30 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-public class Board extends JPanel implements ActionListener {
+import java.awt.*;
+
+public class Environment extends JPanel implements ActionListener {
 
     private final int B_WIDTH = 500;
     private final int B_HEIGHT = 500;
     private final int DOT_SIZE = 25;
-    private final int RAND_POS = 29;
     private final int DELAY = 40;
 
     private Player player;
-    private int apple_x;
-    private int apple_y;
+    private Player enemy;
 
     private boolean inGame = true;
-
-    private Image apple;
-    private Image bulletImg;
 
 
     private ArrayList<Bullet> bullets = new ArrayList<Bullet>();
 
-    public Board() {
+    public Environment() {
 
         initBoard();
         final Timer timer = new Timer(DELAY, new ActionListener() {
@@ -64,7 +60,8 @@ public class Board extends JPanel implements ActionListener {
 
     private void initGame() {
 
-        player = new Player(250, 250, 0);
+        player = new Player(B_WIDTH/2, B_HEIGHT/2, 0);
+        enemy = new Player(100, B_HEIGHT/2, -90);
     }
 
 
@@ -98,9 +95,20 @@ public class Board extends JPanel implements ActionListener {
 
             try {
 
-                BufferedImage originalImage = ImageIO.read(new File("src/resources/player1.gif"));
+                BufferedImage originalImage = ImageIO.read(new File("src/resources/player.gif"));
                 BufferedImage subImage = rotateImage(originalImage, player.rotation);
                 g.drawImage(subImage, player.x, player.y, this);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                double dx = player.x - enemy.x;
+                double dy = player.y - enemy.y;
+                enemy.rotation = (Math.toDegrees(Math.atan2(dy, dx))-90);
+
+                BufferedImage originalImage = ImageIO.read(new File("src/resources/enemy.png"));
+                BufferedImage subImage = rotateImage(originalImage, enemy.rotation);
+                g.drawImage(subImage, enemy.x, enemy.y, this);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -139,7 +147,6 @@ public class Board extends JPanel implements ActionListener {
 
     private void Shoot()
     {
-        System.out.println("Shot");
         int xOffest = 0;
         int yOffset = 0;
 
@@ -246,8 +253,6 @@ public class Board extends JPanel implements ActionListener {
             if ((key == KeyEvent.VK_X)) {
                 System.exit(0);
             }
-
-            System.out.println(player.rotation);
         }
     }
 }

@@ -6,16 +6,16 @@ import javax.swing.JFrame;
 import java.awt.Toolkit;
 import java.awt.Dimension;
 
-public class Snake extends JFrame {
+public class Start extends JFrame {
 
-    public Snake() {
+    public Start() {
 
         initUI();
     }
 
     private void initUI() {
 
-        add(new Board());
+        add(new Environment());
         setUndecorated(true);
 
         setResizable(false);
@@ -35,7 +35,7 @@ public class Snake extends JFrame {
     public static void main(String[] args) {
 
         EventQueue.invokeLater(() -> {
-            JFrame ex = new Snake();
+            JFrame ex = new Start();
             ex.setVisible(true);
         });
     }
