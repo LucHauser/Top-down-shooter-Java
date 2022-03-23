@@ -21,6 +21,7 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.awt.Rectangle;
 
 public class Environment extends JPanel implements ActionListener {
@@ -33,9 +34,9 @@ public class Environment extends JPanel implements ActionListener {
     private Character player;
     private boolean inGame = true;
 
-    private int maxEnemys = 3;
+    private int maxEnemys = 0;
     private int[][] spawnPoints = {{-0,-0},{500,-0},{0,500},{500,500},{0,250},{250,0},{250,500},{500,250}};
-    // private int[] hardrange = {5, 10, 13, 15, 0};
+    private boolean canMove = true;
     private int counter = 0;
     private int kills = 0;
     private int maxShoots = 20;
@@ -194,13 +195,19 @@ public class Environment extends JPanel implements ActionListener {
     private void gameOver(Graphics g) {
 
         String msg = "Game Over";
+        String restartText = "Press R to restart";
+        Font big = new Font("Helvetica", Font.BOLD, 50);
+        FontMetrics metr = getFontMetrics(big);
         Font small = new Font("Helvetica", Font.BOLD, 14);
-        FontMetrics metr = getFontMetrics(small);
+        FontMetrics metrs = getFontMetrics(small);
 
         g.setColor(Color.white);
         setBackground(Color.red);
-        g.setFont(small);
+        g.setFont(big);
         g.drawString(msg, (B_WIDTH - metr.stringWidth(msg)) / 2, B_HEIGHT / 2);
+        g.setFont(small);
+        g.setColor(Color.black);
+        g.drawString(restartText, (B_WIDTH - metrs.stringWidth(restartText)) / 2, B_HEIGHT / 2 + 100);
     }
 
     private void Shoot()
@@ -263,13 +270,6 @@ public class Environment extends JPanel implements ActionListener {
             int[] randomPoint = spawnPoints[new Random().nextInt(spawnPoints.length)];
             Character newEnemy = new Character(randomPoint[0], randomPoint[1], 0);
             enemys.add(newEnemy);
-
-            // if (kills > hardrange[0] && hardrange[0] != 0)
-            // {
-            //     maxEnemys++;
-            //     hardrange = removeFirstElement(hardrange);
-            // }
-
             counter++;
 
             if (counter >= 20)
@@ -278,6 +278,15 @@ public class Environment extends JPanel implements ActionListener {
                 maxEnemys++;
             }
         }
+    }
+
+    private boolean CheckIfOutOfMap(int x, int y, int offset)
+    {
+        if (x < 0 + offset || x > B_WIDTH -offset || y < 0 + offset || y > B_HEIGHT - offset)
+        {
+            return true;
+        }
+        return false;
     }
 
     public static int[] removeFirstElement(int[] arr) {
@@ -332,6 +341,13 @@ public class Environment extends JPanel implements ActionListener {
             }
         }
 
+        for (Bullet bullet : bullets) {
+            if (CheckIfOutOfMap(bullet.x, bullet.y, 0))
+            {
+                toDeleteBullets.add(bullet);
+            }
+        }
+
         for (Bullet bullet : toDeleteBullets) {
             bullets.remove(bullet);
         }
@@ -341,27 +357,37 @@ public class Environment extends JPanel implements ActionListener {
         }
     }
 
+    private boolean canPlayerMoveToThisPosition(int x, int y)
+    {
+        if (x < 0 || y < 0 || x > 450 || y > 450)
+        {
+            return false;
+        }
+        return true;
+    }
+
     private class TAdapter extends KeyAdapter {
 
         @Override
         public void keyPressed(KeyEvent e) {
 
             int key = e.getKeyCode();
+            System.out.println(key);
 
             if ((key == KeyEvent.VK_A)) {
-                player.x -= DOT_SIZE;
+                if (canPlayerMoveToThisPosition(player.x - DOT_SIZE, player.y)) {player.x -= DOT_SIZE;}
             }
 
             if ((key == KeyEvent.VK_D)) {
-                player.x += DOT_SIZE;
+                if (canPlayerMoveToThisPosition(player.x + DOT_SIZE, player.y)) {player.x += DOT_SIZE;}
             }
 
             if ((key == KeyEvent.VK_W)) {
-                player.y -= DOT_SIZE;
+                if (canPlayerMoveToThisPosition(player.x, player.y - DOT_SIZE)) {player.y -= DOT_SIZE;}
             }
 
             if ((key == KeyEvent.VK_S)) {
-                player.y += DOT_SIZE;
+                if (canPlayerMoveToThisPosition(player.x, player.y + DOT_SIZE)) {player.y += DOT_SIZE;}
             }
 
             if ((key == KeyEvent.VK_SPACE)) {
@@ -392,8 +418,17 @@ public class Environment extends JPanel implements ActionListener {
                 System.exit(0);
             }
 
-            if ((key == KeyEvent.VK_R)) {
-                shoots = maxShoots;
+            if (inGame)
+            {
+                if ((key == KeyEvent.VK_R)) {
+                    shoots = maxShoots;
+                }
+            }
+            else
+            {
+                if ((key == KeyEvent.VK_R)) {
+                   
+                }
             }
         }
     }
