@@ -23,6 +23,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.awt.Rectangle;
+import java.awt.MouseInfo;
+import java.awt.Point;
+import java.awt.Dimension;
 
 public class Environment extends JPanel implements ActionListener {
 
@@ -142,7 +145,21 @@ public class Environment extends JPanel implements ActionListener {
             g.drawImage(bg, 0, 0, null);
 
             try {
+                Point mousPos = MouseInfo.getPointerInfo().getLocation();
+                // System.out.println(mousPos);
+                int mX = (int) mousPos.getX();
+                int mY = (int) mousPos.getY();
+                // int wmx = mX/2 - B_WIDTH/2 -8;
+                // int wmy = mY/2 - B_HEIGHT/2 -8;
 
+                // System.out.println(wmx);
+                // System.out.print(wmy);
+                Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+                int x = (screenSize.width - this.getWidth()) / 2;
+                int y = (screenSize.height - this.getHeight()) / 2;
+                mX -= x;
+                mY -= y - 20;
+                System.out.println(mX + "||" +mY);
                 BufferedImage originalImage = ImageIO.read(new File("src/resources/player.gif"));
                 BufferedImage subImage = rotateImage(originalImage, player.rotation);
                 g.drawImage(subImage, player.x, player.y, this);
