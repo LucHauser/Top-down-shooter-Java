@@ -147,6 +147,9 @@ public class Environment extends JPanel implements ActionListener {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            DrawEnemys(g);
+            DrawBullets(g);
+
             String killsText = "kills: " + kills;
             String shotsText = "";
             Font small = new Font("Helvetica", Font.BOLD, 14);
@@ -166,8 +169,7 @@ public class Environment extends JPanel implements ActionListener {
                 g.setColor(Color.red);
             }
             g.drawString(shotsText, (B_WIDTH - metr.stringWidth(shotsText)), 20);
-            DrawEnemys(g);
-            DrawBullets(g);
+
             Toolkit.getDefaultToolkit().sync();
         } else {
 
