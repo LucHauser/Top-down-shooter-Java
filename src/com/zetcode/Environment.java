@@ -37,9 +37,10 @@ public class Environment extends JPanel implements ActionListener {
     private Character player;
     private boolean inGame = true;
 
-    private int maxEnemys = 3;
+    private int maxEnemys = 0;
     private int[][] spawnPoints = {{-0,-0},{500,-0},{0,500},{500,500},{0,250},{250,0},{250,500},{500,250}};
-    private boolean canMove = true;
+    private int mX;
+    private int mY;
     private int counter = 0;
     private int kills = 0;
     private int maxShoots = 20;
@@ -71,11 +72,11 @@ public class Environment extends JPanel implements ActionListener {
 
     private void initGame() {
         player = new Character(B_WIDTH/2, B_HEIGHT/2, 0);
-        Character fEnemy = new Character(100, B_HEIGHT/2, -90);
+        // Character fEnemy = new Character(100, B_HEIGHT/2, -90);
 
-        enemys.add(fEnemy);
-        Character sEnemy = new Character(400, B_HEIGHT/2, 180);
-        enemys.add(sEnemy);
+        // enemys.add(fEnemy);
+        // Character sEnemy = new Character(400, B_HEIGHT/2, 180);
+        // enemys.add(sEnemy);
     }
 
 
@@ -94,6 +95,9 @@ public class Environment extends JPanel implements ActionListener {
 
                     BufferedImage originalImage = ImageIO.read(new File("src/resources/round.png"));
                     BufferedImage subImage = rotateImage(originalImage, bullet.rotation);
+                    // bullet.x += Math.cos(bullet.rotation) *  3 + Math.sin(bullet.rotation) * 2;
+                    // bullet.y -= -Math.cos(bullet.rotation) * 2 + Math.sin(bullet.rotation) * 3;
+                    // System.out.println(bullet.rotation);
                     bullet.updatePostion();
                     g.drawImage(subImage, bullet.x += bullet.xOffset, bullet.y += bullet.yOffet, this);
                 } catch (IOException e) {
@@ -147,8 +151,8 @@ public class Environment extends JPanel implements ActionListener {
             try {
                 Point mousPos = MouseInfo.getPointerInfo().getLocation();
                 // System.out.println(mousPos);
-                int mX = (int) mousPos.getX();
-                int mY = (int) mousPos.getY();
+                mX = (int) mousPos.getX();
+                mY = (int) mousPos.getY();
                 // int wmx = mX/2 - B_WIDTH/2 -8;
                 // int wmy = mY/2 - B_HEIGHT/2 -8;
 
@@ -163,7 +167,7 @@ public class Environment extends JPanel implements ActionListener {
                 double dy = mY - player.y;
                 player.rotation = (Math.toDegrees(Math.atan2(dy, dx)));
 
-                System.out.println(mX + "||" +mY);
+                // System.out.println(mX + "||" +mY);
                 BufferedImage originalImage = ImageIO.read(new File("src/resources/player.gif"));
                 BufferedImage subImage = rotateImage(originalImage, player.rotation);
                 g.drawImage(subImage, player.x, player.y, this);
@@ -291,7 +295,8 @@ public class Environment extends JPanel implements ActionListener {
             //     xOffest = 56;
             //     yOffset = 12;
             // }
-            Bullet bullet = new Bullet(player.x + xOffest, player.y + yOffset, player.rotation);
+            System.out.println(player.rotation*-1);
+            Bullet bullet = new Bullet(player.x + xOffest, player.y + yOffset, player.rotation*-1);
             bullets.add(bullet);
             shoots--;
         }
