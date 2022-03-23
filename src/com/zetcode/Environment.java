@@ -34,7 +34,7 @@ public class Environment extends JPanel implements ActionListener {
     private boolean inGame = true;
 
     private int maxEnemys = 3;
-    private int[][] spawnPoints = {{-100,-100},{550,-50},{510,550},{550,550}};
+    private int[][] spawnPoints = {{-0,-0},{500,-0},{0,500},{500,500},{0,250},{250,0},{250,500},{500,250}};
     // private int[] hardrange = {5, 10, 13, 15, 0};
     private int counter = 0;
     private int kills = 16;
