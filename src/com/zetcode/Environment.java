@@ -25,7 +25,6 @@ import java.net.URISyntaxException;
 import java.awt.Rectangle;
 import java.awt.MouseInfo;
 import java.awt.Point;
-import java.awt.Dimension;
 
 public class Environment extends JPanel implements ActionListener {
 
@@ -48,6 +47,7 @@ public class Environment extends JPanel implements ActionListener {
 
     private ArrayList<Bullet> bullets = new ArrayList<Bullet>();
     private ArrayList<Character> enemys = new ArrayList<Character>();
+    private ArrayList<Blood> bloodEffects = new ArrayList<Blood>();
 
     public Environment() {
 
@@ -72,11 +72,11 @@ public class Environment extends JPanel implements ActionListener {
 
     private void initGame() {
         player = new Character(B_WIDTH/2, B_HEIGHT/2, 0);
-        // Character fEnemy = new Character(100, B_HEIGHT/2, -90);
+        Character fEnemy = new Character(100, B_HEIGHT/2, -90);
 
-        // enemys.add(fEnemy);
-        // Character sEnemy = new Character(400, B_HEIGHT/2, 180);
-        // enemys.add(sEnemy);
+        enemys.add(fEnemy);
+        Character sEnemy = new Character(400, B_HEIGHT/2, 180);
+        enemys.add(sEnemy);
     }
 
 
@@ -140,6 +140,25 @@ public class Environment extends JPanel implements ActionListener {
             }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+
+        ArrayList<Blood> bloodEffectsToDestroy = new ArrayList<Blood>();
+
+        for (Blood blood : bloodEffects) {
+            blood.UpDateLifeTime();
+            if (blood.getLiefetime() <= 0)
+            {
+                bloodEffectsToDestroy.add(blood);
+            }
+            else
+            {
+                Image bloodImage = Toolkit.getDefaultToolkit().getImage("src/resources/blood.png");
+                g.drawImage(bloodImage, blood.getX(), blood.getY(), null);
+            }
+        }
+
+        for (Blood blood : bloodEffectsToDestroy) {
+            bloodEffects.remove(blood);
         }
     }
 
@@ -378,6 +397,11 @@ public class Environment extends JPanel implements ActionListener {
                     kills++;
                 }
             }
+        }
+
+        for (Character enemy : toDeleteEnemys) {
+            Blood newbloodParticle = new Blood(enemy.x, enemy.y, 5);
+            bloodEffects.add(newbloodParticle);
         }
 
         for (Bullet bullet : bullets) {
