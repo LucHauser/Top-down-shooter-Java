@@ -75,6 +75,7 @@ public class Environment extends JPanel implements ActionListener {
         enemys.add(sEnemy);
     }
 
+
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -208,6 +209,18 @@ public class Environment extends JPanel implements ActionListener {
         g.setFont(small);
         g.setColor(Color.black);
         g.drawString(restartText, (B_WIDTH - metrs.stringWidth(restartText)) / 2, B_HEIGHT / 2 + 100);
+    }
+
+    private void restart()
+    {
+        kills = 0;
+        shoots = maxShoots;
+        player.x = B_WIDTH/2;
+        player.x = B_HEIGHT/2;
+        bullets.clear();
+        enemys.clear();
+        initGame();
+        inGame = true;
     }
 
     private void Shoot()
@@ -426,7 +439,7 @@ public class Environment extends JPanel implements ActionListener {
             else
             {
                 if ((key == KeyEvent.VK_R)) {
-                   
+                    restart();
                 }
             }
         }
