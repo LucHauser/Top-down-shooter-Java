@@ -34,7 +34,7 @@ public class Environment extends JPanel implements ActionListener {
     private Character player;
     private boolean inGame = true;
 
-    private int maxEnemys = 0;
+    private int maxEnemys = 3;
     private int[][] spawnPoints = {{-0,-0},{500,-0},{0,500},{500,500},{0,250},{250,0},{250,500},{500,250}};
     private boolean canMove = true;
     private int counter = 0;
@@ -372,7 +372,6 @@ public class Environment extends JPanel implements ActionListener {
         public void keyPressed(KeyEvent e) {
 
             int key = e.getKeyCode();
-            System.out.println(key);
 
             if ((key == KeyEvent.VK_A)) {
                 if (canPlayerMoveToThisPosition(player.x - DOT_SIZE, player.y)) {player.x -= DOT_SIZE;}
