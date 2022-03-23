@@ -37,7 +37,9 @@ public class Environment extends JPanel implements ActionListener {
     private int[][] spawnPoints = {{-0,-0},{500,-0},{0,500},{500,500},{0,250},{250,0},{250,500},{500,250}};
     // private int[] hardrange = {5, 10, 13, 15, 0};
     private int counter = 0;
-    private int kills = 16;
+    private int kills = 0;
+    private int maxShoots = 20;
+    private int shoots = maxShoots;
 
     private ArrayList<Bullet> bullets = new ArrayList<Bullet>();
     private ArrayList<Character> enemys = new ArrayList<Character>();
@@ -146,12 +148,24 @@ public class Environment extends JPanel implements ActionListener {
                 e.printStackTrace();
             }
             String killsText = "kills: " + kills;
+            String shotsText = "";
             Font small = new Font("Helvetica", Font.BOLD, 14);
             FontMetrics metr = getFontMetrics(small);
 
             g.setColor(Color.yellow);
             g.setFont(small);
             g.drawString(killsText, (B_WIDTH - metr.stringWidth(killsText)) / 2, 20);
+            if (shoots > 0)
+            {
+                shotsText = "shots: " + shoots;
+                g.setColor(Color.white);
+            }
+            else
+            {
+                shotsText = "Press R to reload";
+                g.setColor(Color.red);
+            }
+            g.drawString(shotsText, (B_WIDTH - metr.stringWidth(shotsText)), 20);
             DrawEnemys(g);
             DrawBullets(g);
             Toolkit.getDefaultToolkit().sync();
@@ -189,51 +203,55 @@ public class Environment extends JPanel implements ActionListener {
 
     private void Shoot()
     {
-        int xOffest = 0;
-        int yOffset = 0;
+        if (shoots > 0)
+        {
+            int xOffest = 0;
+            int yOffset = 0;
 
-        if (player.rotation == 0)
-        {
-            xOffest = 50;
-            yOffset = 36;
+            if (player.rotation == 0)
+            {
+                xOffest = 50;
+                yOffset = 36;
+            }
+            else if (player.rotation == 45)
+            {
+                xOffest = 34;
+                yOffset = 49;
+            }
+            else if (player.rotation == 90)
+            {
+                xOffest = 14;
+                yOffset = 48;
+            }
+            else if (player.rotation == 135)
+            {
+                xOffest = 2;
+                yOffset = 27;
+            }
+            else if (player.rotation == 180)
+            {
+                xOffest = 3;
+                yOffset = 8;
+            }
+            else if (player.rotation == 225)
+            {
+                xOffest = 22;
+                yOffset = 0;
+            }
+            else if (player.rotation == 270)
+            {
+                xOffest = 40;
+                yOffset = -2;
+            }
+            else if (player.rotation == 315)
+            {
+                xOffest = 56;
+                yOffset = 12;
+            }
+            Bullet bullet = new Bullet(player.x + xOffest, player.y + yOffset, player.rotation);
+            bullets.add(bullet);
+            shoots--;
         }
-        else if (player.rotation == 45)
-        {
-            xOffest = 34;
-            yOffset = 49;
-        }
-        else if (player.rotation == 90)
-        {
-            xOffest = 14;
-            yOffset = 48;
-        }
-        else if (player.rotation == 135)
-        {
-            xOffest = 2;
-            yOffset = 27;
-        }
-        else if (player.rotation == 180)
-        {
-            xOffest = 3;
-            yOffset = 8;
-        }
-        else if (player.rotation == 225)
-        {
-            xOffest = 22;
-            yOffset = 0;
-        }
-        else if (player.rotation == 270)
-        {
-            xOffest = 40;
-            yOffset = -2;
-        }
-        else if (player.rotation == 315)
-        {
-            xOffest = 56;
-            yOffset = 12;
-        }
-        Bullet bullet = new Bullet(player.x + xOffest, player.y + yOffset, player.rotation);
-        bullets.add(bullet);
     }
 
     private void SpawnEnemys()
@@ -370,6 +388,10 @@ public class Environment extends JPanel implements ActionListener {
 
             if ((key == KeyEvent.VK_X)) {
                 System.exit(0);
+            }
+
+            if ((key == KeyEvent.VK_R)) {
+                shoots = maxShoots;
             }
         }
     }
