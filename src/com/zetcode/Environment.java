@@ -153,12 +153,16 @@ public class Environment extends JPanel implements ActionListener {
                 // int wmy = mY/2 - B_HEIGHT/2 -8;
 
                 // System.out.println(wmx);
-                // System.out.print(wmy);
+                // System.out.print(wmy)
                 Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-                int x = (screenSize.width - this.getWidth()) / 2;
-                int y = (screenSize.height - this.getHeight()) / 2;
+                int x = (screenSize.width/ 2) - B_WIDTH/2;
+                int y = (screenSize.height/ 2) - B_HEIGHT/2;
                 mX -= x;
-                mY -= y - 20;
+                mY -= y -20;
+                double dx = mX - player.x;
+                double dy = mY - player.y;
+                player.rotation = (Math.toDegrees(Math.atan2(dy, dx)));
+
                 System.out.println(mX + "||" +mY);
                 BufferedImage originalImage = ImageIO.read(new File("src/resources/player.gif"));
                 BufferedImage subImage = rotateImage(originalImage, player.rotation);
@@ -247,46 +251,46 @@ public class Environment extends JPanel implements ActionListener {
             int xOffest = 0;
             int yOffset = 0;
 
-            if (player.rotation == 0)
-            {
-                xOffest = 50;
-                yOffset = 36;
-            }
-            else if (player.rotation == 45)
-            {
-                xOffest = 34;
-                yOffset = 49;
-            }
-            else if (player.rotation == 90)
-            {
-                xOffest = 14;
-                yOffset = 48;
-            }
-            else if (player.rotation == 135)
-            {
-                xOffest = 2;
-                yOffset = 27;
-            }
-            else if (player.rotation == 180)
-            {
-                xOffest = 3;
-                yOffset = 8;
-            }
-            else if (player.rotation == 225)
-            {
-                xOffest = 22;
-                yOffset = 0;
-            }
-            else if (player.rotation == 270)
-            {
-                xOffest = 40;
-                yOffset = -2;
-            }
-            else if (player.rotation == 315)
-            {
-                xOffest = 56;
-                yOffset = 12;
-            }
+            // if (player.rotation == 0)
+            // {
+            //     xOffest = 50;
+            //     yOffset = 36;
+            // }
+            // else if (player.rotation == 45)
+            // {
+            //     xOffest = 34;
+            //     yOffset = 49;
+            // }
+            // else if (player.rotation == 90)
+            // {
+            //     xOffest = 14;
+            //     yOffset = 48;
+            // }
+            // else if (player.rotation == 135)
+            // {
+            //     xOffest = 2;
+            //     yOffset = 27;
+            // }
+            // else if (player.rotation == 180)
+            // {
+            //     xOffest = 3;
+            //     yOffset = 8;
+            // }
+            // else if (player.rotation == 225)
+            // {
+            //     xOffest = 22;
+            //     yOffset = 0;
+            // }
+            // else if (player.rotation == 270)
+            // {
+            //     xOffest = 40;
+            //     yOffset = -2;
+            // }
+            // else if (player.rotation == 315)
+            // {
+            //     xOffest = 56;
+            //     yOffset = 12;
+            // }
             Bullet bullet = new Bullet(player.x + xOffest, player.y + yOffset, player.rotation);
             bullets.add(bullet);
             shoots--;
