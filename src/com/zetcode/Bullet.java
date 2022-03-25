@@ -19,7 +19,7 @@ public class Bullet {
     {
         this.y += (-2*Math.sin(Math.toRadians(this.rotation)));
         // System.out.println(Math.sin(Math.toRadians(90)));
-        this.x += (2*Math.sin(Math.toRadians(90-this.rotation)));
+        this.y += (-2*Math.sin(Math.toRadians(this.rotation)));
         // if (rotation == 0)
         // {
         //     this.x += 2 *bulletSpeed;

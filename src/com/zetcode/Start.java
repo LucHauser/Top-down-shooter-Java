@@ -25,8 +25,6 @@ public class Start extends JFrame {
         int x = (screenSize.width - this.getWidth()) / 2;
         int y = (screenSize.height - this.getHeight()) / 2;
         setLocation(x, y);
-
-        setTitle("TopdownShooter");
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }

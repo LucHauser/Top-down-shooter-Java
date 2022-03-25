@@ -114,22 +114,9 @@ public class Environment extends JPanel implements ActionListener {
             checkPlayerCollsison();
 
             for (Character enemy : enemys) {
-                if (enemy.x < player.x)
-                {
-                    enemy.x += 1;
-                }
-                if (enemy.x > player.x)
-                {
-                    enemy.x -= 1;
-                }
-                if (enemy.y < player.y)
-                {
-                    enemy.y += 1;
-                }
-                if (enemy.y > player.y)
-                {
-                    enemy.y -= 1;
-                }
+                enemy.y -= (2*Math.sin(Math.toRadians(enemy.rotation-90)));
+                enemy.x -= (2*Math.sin(Math.toRadians(enemy.rotation)));
+
                 double dx = player.x - enemy.x;
                 double dy = player.y - enemy.y;
                 enemy.rotation = (Math.toDegrees(Math.atan2(dy, dx))-90);
