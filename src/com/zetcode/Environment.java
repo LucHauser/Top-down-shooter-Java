@@ -95,9 +95,6 @@ public class Environment extends JPanel implements ActionListener {
 
                     BufferedImage originalImage = ImageIO.read(new File("src/resources/round.png"));
                     BufferedImage subImage = rotateImage(originalImage, bullet.rotation);
-                    // bullet.x += Math.cos(bullet.rotation) *  3 + Math.sin(bullet.rotation) * 2;
-                    // bullet.y -= -Math.cos(bullet.rotation) * 2 + Math.sin(bullet.rotation) * 3;
-                    // System.out.println(bullet.rotation);
                     bullet.updatePostion();
                     g.drawImage(subImage, bullet.x += bullet.xOffset, bullet.y += bullet.yOffet, this);
                 } catch (IOException e) {
@@ -156,14 +153,9 @@ public class Environment extends JPanel implements ActionListener {
 
             try {
                 Point mousPos = MouseInfo.getPointerInfo().getLocation();
-                // System.out.println(mousPos);
                 mX = (int) mousPos.getX();
                 mY = (int) mousPos.getY();
-                // int wmx = mX/2 - B_WIDTH/2 -8;
-                // int wmy = mY/2 - B_HEIGHT/2 -8;
 
-                // System.out.println(wmx);
-                // System.out.print(wmy)
                 Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
                 int x = (screenSize.width/ 2) - B_WIDTH/2;
                 int y = (screenSize.height/ 2) - B_HEIGHT/2;
@@ -258,53 +250,30 @@ public class Environment extends JPanel implements ActionListener {
     {
         if (shoots > 0)
         {
-            int xOffest = 0;
-            int yOffset = 0;
+            int xOffest = 60/2;
+            int yOffset = 50/2;
+            // int xOffest = 0;
+            // int yOffset = 0;
 
-            // if (player.rotation == 0)
-            // {
-            //     xOffest = 50;
-            //     yOffset = 36;
-            // }
-            // else if (player.rotation == 45)
-            // {
-            //     xOffest = 34;
-            //     yOffset = 49;
-            // }
-            // else if (player.rotation == 90)
-            // {
-            //     xOffest = 14;
-            //     yOffset = 48;
-            // }
-            // else if (player.rotation == 135)
-            // {
-            //     xOffest = 2;
-            //     yOffset = 27;
-            // }
-            // else if (player.rotation == 180)
-            // {
-            //     xOffest = 3;
-            //     yOffset = 8;
-            // }
-            // else if (player.rotation == 225)
-            // {
-            //     xOffest = 22;
-            //     yOffset = 0;
-            // }
-            // else if (player.rotation == 270)
-            // {
-            //     xOffest = 40;
-            //     yOffset = -2;
-            // }
-            // else if (player.rotation == 315)
-            // {
-            //     xOffest = 56;
-            //     yOffset = 12;
-            // }
+            double dx = mX - (player.x + xOffest);
+            double dy = mY - (player.y + yOffset);
+            double rotation = (Math.toDegrees(Math.atan2(dy, dx)));
+
             System.out.println(player.rotation*-1);
             Bullet bullet = new Bullet(player.x + xOffest, player.y + yOffset, player.rotation*-1);
             bullets.add(bullet);
             shoots--;
+            for (int i = 0; i < 4; i++)
+            {
+                bullet.updatePostion();
+            }
+
+            // double xForce = (2*Math.sin(Math.toRadians(90-bullet.rotation*-1)));
+            // double yForce = (-2*Math.sin(Math.toRadians(bullet.rotation*-1)));
+            // if (xForce > yForce)
+            // {
+            //     bullet.x -= 5;
+            // }
         }
     }
 
@@ -441,26 +410,6 @@ public class Environment extends JPanel implements ActionListener {
 
             if ((key == KeyEvent.VK_SPACE)) {
                 Shoot();
-            }
-
-            if ((key == KeyEvent.VK_RIGHT)) {
-                if (player.rotation == 315)
-                {
-                    player.rotation = 0;
-                }
-                else{
-                    player.rotation += 45;
-                }
-            }
-
-            if ((key == KeyEvent.VK_LEFT)) {
-                if (player.rotation ==  0)
-                {
-                    player.rotation = 315;
-                }
-                else{
-                    player.rotation -= 45;
-                }
             }
 
             if ((key == KeyEvent.VK_X)) {
