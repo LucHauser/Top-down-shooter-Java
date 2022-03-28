@@ -108,7 +108,7 @@ public class Environment extends JPanel implements ActionListener {
     private void DrawEnemys(Graphics g)
     {
         try {
-            checkPlayerCollsison();
+            checkPlayerCollsison(g);
 
             for (Character enemy : enemys) {
                 enemy.y -= (2*Math.sin(Math.toRadians(enemy.rotation-90)));
@@ -303,18 +303,22 @@ public class Environment extends JPanel implements ActionListener {
         }
     }
 
-    private void checkPlayerCollsison()
+    private void checkPlayerCollsison(Graphics g)
     {
+        Sprite playeSprite = new Sprite(player.x, player.y, "src/resources/player.gif");
+        Rectangle playerRect = playeSprite.getBounds();
+        playerRect.setSize(playerRect.width/2, playerRect.height/2);
+        // g.drawRect(playerRect.x, playerRect.y, (int)playerRect.getWidth(), (int)playerRect.getHeight());
+
         for (Character enemy : enemys) {
             Sprite enemySprite = new Sprite(enemy.x, enemy.y, "src/resources/enemy.png");
-            Sprite playeSprite = new Sprite(player.x, player.y, "src/resources/player.gif");
 
             Rectangle enemyRect = enemySprite.getBounds();
-            Rectangle playerRect = playeSprite.getBounds();
             enemyRect.setSize(enemyRect.width/2, enemyRect.height/2);
             if (enemyRect.intersects(playerRect)) {
                 inGame = false;
             }
+            // g.drawRect(enemyRect.x, enemyRect.y, (int)enemyRect.getWidth(), (int)enemyRect.getHeight());
         }
     }
 

@@ -25,6 +25,6 @@ public class Sprite {
 
     //this will be used for collision detection
     public Rectangle getBounds() {
-        return new Rectangle(x, y, width, height);
+        return new Rectangle(x+(width/4), y+(height/4), width, height);
     }
 }
