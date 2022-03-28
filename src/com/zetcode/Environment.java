@@ -275,6 +275,7 @@ public class Environment extends JPanel implements ActionListener  {
         initGame();
         inGame = true;
         highscoreCheck = false;
+        maxEnemys = 3;
     }
 
     int SaveScore(Integer score)
@@ -499,16 +500,22 @@ public class Environment extends JPanel implements ActionListener  {
     public class MapListener implements MouseListener{
         @Override
         public void mouseClicked(MouseEvent e) {
+            // if (e.getButton() == MouseEvent.BUTTON1) {
+            //     Shoot();
+            // }
+            // if (e.getButton() == MouseEvent.BUTTON3 && inGame) {
+            //     shoots = maxShoots;
+            // }
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
             if (e.getButton() == MouseEvent.BUTTON1) {
                 Shoot();
             }
             if (e.getButton() == MouseEvent.BUTTON3 && inGame) {
                 shoots = maxShoots;
             }
-        }
-
-        @Override
-        public void mouseEntered(MouseEvent e) {
         }
 
         @Override
