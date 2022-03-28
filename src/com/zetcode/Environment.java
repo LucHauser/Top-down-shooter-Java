@@ -36,7 +36,7 @@ public class Environment extends JPanel implements ActionListener {
     private Character player;
     private boolean inGame = true;
 
-    private int maxEnemys = 0;
+    private int maxEnemys = 3;
     private int[][] spawnPoints = {{-0,-0},{500,-0},{0,500},{500,500},{0,250},{250,0},{250,500},{500,250}};
     private int mX;
     private int mY;
@@ -72,11 +72,11 @@ public class Environment extends JPanel implements ActionListener {
 
     private void initGame() {
         player = new Character(B_WIDTH/2, B_HEIGHT/2, 0);
-        // Character fEnemy = new Character(100, B_HEIGHT/2, -90);
+        Character fEnemy = new Character(100, B_HEIGHT/2, -90);
 
-        // enemys.add(fEnemy);
-        // Character sEnemy = new Character(400, B_HEIGHT/2, 180);
-        // enemys.add(sEnemy);
+        enemys.add(fEnemy);
+        Character sEnemy = new Character(400, B_HEIGHT/2, 180);
+        enemys.add(sEnemy);
     }
 
 
@@ -110,31 +110,6 @@ public class Environment extends JPanel implements ActionListener {
         try {
             checkPlayerCollsison();
 
-            // for (Character enemy : enemys) {
-                // if (enemy.x < player.x)
-                // {
-                //     enemy.x += 1;
-                // }
-                // if (enemy.x > player.x)
-                // {
-                //     enemy.x -= 1;
-                // }
-                // if (enemy.y < player.y)
-                // {
-                //     enemy.y += 1;
-                // }
-                // if (enemy.y > player.y)
-                // {
-                //     enemy.y -= 1;
-                // }
-                // double dx = player.x - enemy.x;
-                // double dy = player.y - enemy.y;
-                // enemy.rotation = (Math.toDegrees(Math.atan2(dy, dx))-90);
-
-                // BufferedImage originalImage = ImageIO.read(new File("src/resources/enemy.png"));
-                // BufferedImage subImage = rotateImage(originalImage, enemy.rotation);
-                // g.drawImage(subImage, enemy.x, enemy.y, this);
-            // }
             for (Character enemy : enemys) {
                 enemy.y -= (2*Math.sin(Math.toRadians(enemy.rotation-90)));
                 enemy.x -= (2*Math.sin(Math.toRadians(enemy.rotation)));
@@ -190,7 +165,6 @@ public class Environment extends JPanel implements ActionListener {
                 double dy = mY - player.y - 25;
                 player.rotation = (Math.toDegrees(Math.atan2(dy, dx)));
 
-                // System.out.println(mX + "||" +mY);
                 BufferedImage originalImage = ImageIO.read(new File("src/resources/player.gif"));
                 BufferedImage subImage = rotateImage(originalImage, player.rotation);
                 g.drawImage(subImage, player.x, player.y, this);
@@ -277,35 +251,13 @@ public class Environment extends JPanel implements ActionListener {
         {
             int xOffest = 60/2;
             int yOffset = 50/2;
-            // int xOffest = 0;
-            // int yOffset = 0;
 
-            double dx = mX - (player.x + xOffest);
-            double dy = mY - (player.y + yOffset);
-            double rotation = (Math.toDegrees(Math.atan2(dy, dx)));
-
-            System.out.println(player.rotation*-1);
             Bullet bullet = new Bullet(player.x + xOffest, player.y + yOffset, player.rotation*-1);
             bullets.add(bullet);
             shoots--;
-            
-            bullet.y += (-20*Math.sin(Math.toRadians(bullet.rotation-30)));
-            bullet.x += (20*Math.sin(Math.toRadians(90-(bullet.rotation-30))));
-            // for (int i = 0; i < 4; i++)
-            // {
-            //     bullet.updatePostion();
-            // }
 
-            // double xForce = (2*Math.sin(Math.toRadians(90-bullet.rotation*-1)));
-            // double yForce = (-2*Math.sin(Math.toRadians(bullet.rotation*-1)));
-            // if (xForce < yForce)
-            // {
-            //     bullet.x += (2*Math.sin(Math.toRadians(90-bullet.rotation)));
-            // }
-            // else
-            // {
-            //     bullet.y += (-2*Math.sin(Math.toRadians(bullet.rotation)));
-            // }
+            bullet.y += (-24*Math.sin(Math.toRadians(bullet.rotation-30)));
+            bullet.x += (24*Math.sin(Math.toRadians(90-bullet.rotation+30)));
         }
     }
 
