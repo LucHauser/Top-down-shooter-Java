@@ -72,11 +72,11 @@ public class Environment extends JPanel implements ActionListener {
 
     private void initGame() {
         player = new Character(B_WIDTH/2, B_HEIGHT/2, 0);
-        Character fEnemy = new Character(100, B_HEIGHT/2, -90);
+        // Character fEnemy = new Character(100, B_HEIGHT/2, -90);
 
-        enemys.add(fEnemy);
-        Character sEnemy = new Character(400, B_HEIGHT/2, 180);
-        enemys.add(sEnemy);
+        // enemys.add(fEnemy);
+        // Character sEnemy = new Character(400, B_HEIGHT/2, 180);
+        // enemys.add(sEnemy);
     }
 
 
@@ -110,6 +110,31 @@ public class Environment extends JPanel implements ActionListener {
         try {
             checkPlayerCollsison();
 
+            // for (Character enemy : enemys) {
+                // if (enemy.x < player.x)
+                // {
+                //     enemy.x += 1;
+                // }
+                // if (enemy.x > player.x)
+                // {
+                //     enemy.x -= 1;
+                // }
+                // if (enemy.y < player.y)
+                // {
+                //     enemy.y += 1;
+                // }
+                // if (enemy.y > player.y)
+                // {
+                //     enemy.y -= 1;
+                // }
+                // double dx = player.x - enemy.x;
+                // double dy = player.y - enemy.y;
+                // enemy.rotation = (Math.toDegrees(Math.atan2(dy, dx))-90);
+
+                // BufferedImage originalImage = ImageIO.read(new File("src/resources/enemy.png"));
+                // BufferedImage subImage = rotateImage(originalImage, enemy.rotation);
+                // g.drawImage(subImage, enemy.x, enemy.y, this);
+            // }
             for (Character enemy : enemys) {
                 enemy.y -= (2*Math.sin(Math.toRadians(enemy.rotation-90)));
                 enemy.x -= (2*Math.sin(Math.toRadians(enemy.rotation)));
@@ -161,8 +186,8 @@ public class Environment extends JPanel implements ActionListener {
                 int y = (screenSize.height/ 2) - B_HEIGHT/2;
                 mX -= x;
                 mY -= y -20;
-                double dx = mX - player.x;
-                double dy = mY - player.y;
+                double dx = mX - player.x - 30;
+                double dy = mY - player.y - 25;
                 player.rotation = (Math.toDegrees(Math.atan2(dy, dx)));
 
                 // System.out.println(mX + "||" +mY);
@@ -263,16 +288,23 @@ public class Environment extends JPanel implements ActionListener {
             Bullet bullet = new Bullet(player.x + xOffest, player.y + yOffset, player.rotation*-1);
             bullets.add(bullet);
             shoots--;
-            for (int i = 0; i < 4; i++)
-            {
-                bullet.updatePostion();
-            }
+            
+            bullet.y += (-20*Math.sin(Math.toRadians(bullet.rotation-30)));
+            bullet.x += (20*Math.sin(Math.toRadians(90-(bullet.rotation-30))));
+            // for (int i = 0; i < 4; i++)
+            // {
+            //     bullet.updatePostion();
+            // }
 
             // double xForce = (2*Math.sin(Math.toRadians(90-bullet.rotation*-1)));
             // double yForce = (-2*Math.sin(Math.toRadians(bullet.rotation*-1)));
-            // if (xForce > yForce)
+            // if (xForce < yForce)
             // {
-            //     bullet.x -= 5;
+            //     bullet.x += (2*Math.sin(Math.toRadians(90-bullet.rotation)));
+            // }
+            // else
+            // {
+            //     bullet.y += (-2*Math.sin(Math.toRadians(bullet.rotation)));
             // }
         }
     }
