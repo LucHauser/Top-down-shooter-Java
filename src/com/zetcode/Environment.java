@@ -20,11 +20,17 @@ import javax.swing.Timer;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.awt.Rectangle;
 import java.awt.MouseInfo;
 import java.awt.Point;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class Environment extends JPanel implements ActionListener {
 
@@ -44,6 +50,8 @@ public class Environment extends JPanel implements ActionListener {
     private int kills = 0;
     private int maxShoots = 20;
     private int shoots = maxShoots;
+    private int highscore;
+    private boolean highscoreCheck = false;
 
     private ArrayList<Bullet> bullets = new ArrayList<Bullet>();
     private ArrayList<Character> enemys = new ArrayList<Character>();
@@ -218,19 +226,33 @@ public class Environment extends JPanel implements ActionListener {
     private void gameOver(Graphics g) {
 
         String msg = "Game Over";
+        String score = "score: " + kills;
+        if (!this.highscoreCheck)
+        {
+            this.highscoreCheck = true;
+            highscore = SaveScore(kills);
+        }
+        String highscoreText = "highscore: " + highscore;
         String restartText = "Press R to restart";
         Font big = new Font("Helvetica", Font.BOLD, 50);
         FontMetrics metr = getFontMetrics(big);
         Font small = new Font("Helvetica", Font.BOLD, 14);
+        Font midle = new Font("Helvetica", Font.BOLD, 30);
         FontMetrics metrs = getFontMetrics(small);
+        FontMetrics midlemetrs = getFontMetrics(midle);
 
         g.setColor(Color.white);
         setBackground(Color.red);
         g.setFont(big);
-        g.drawString(msg, (B_WIDTH - metr.stringWidth(msg)) / 2, B_HEIGHT / 2);
+        g.drawString(msg, (B_WIDTH - metr.stringWidth(msg)) / 2, B_HEIGHT / 2 -100);
         g.setFont(small);
         g.setColor(Color.black);
         g.drawString(restartText, (B_WIDTH - metrs.stringWidth(restartText)) / 2, B_HEIGHT / 2 + 100);
+        g.setFont(midle);
+        g.setColor(Color.white);
+        g.drawString(score, (B_WIDTH - midlemetrs.stringWidth(score)) / 2, B_HEIGHT / 2 -30);
+        g.drawString(highscoreText, (B_WIDTH - midlemetrs.stringWidth(highscoreText)) / 2, B_HEIGHT / 2 + 20);
+        g.setFont(small);
     }
 
     private void restart()
@@ -243,6 +265,65 @@ public class Environment extends JPanel implements ActionListener {
         enemys.clear();
         initGame();
         inGame = true;
+        highscoreCheck = false;
+    }
+
+    int SaveScore(Integer score)
+    {
+        File scoreFile = new File(System.getProperty("user.dir") + "\\src\\resources\\score.txt");
+        try{
+            scoreFile.createNewFile();
+            BufferedWriter wirter = new BufferedWriter(new FileWriter(scoreFile));
+            wirter.write("0");
+            wirter.close();
+        } catch(IOException e){
+            System.out.println("Error: "+e);
+        }
+
+        BufferedReader reader = null;
+        BufferedWriter wirter = null;
+        
+        try{
+            reader = new BufferedReader(new FileReader(scoreFile));
+            String currentLine = reader.readLine();
+            // System.out.println(currentLine);
+
+            wirter = new BufferedWriter(new FileWriter(scoreFile));
+
+            //  currentLine;
+
+            // if (currentLine == null)
+            // {
+            //     System.out.println(currentLine);
+            //     System.out.println(scoreFile);
+                
+            //     wirter.write(score.toString());
+            //     // System.out.println("null");
+            //     return score;
+            // }
+
+            Integer highscore = Integer.parseInt(currentLine);
+
+            if (highscore > score)
+            {
+                wirter.write(highscore.toString());
+                return highscore;
+            } else {
+                wirter.write(score.toString());
+                return score;
+            }
+        } catch(IOException e){
+            System.out.println("Error: "+e);
+        } finally
+        {
+            try {
+                reader.close();
+                wirter.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return 0;
     }
 
     private void Shoot()
@@ -308,7 +389,6 @@ public class Environment extends JPanel implements ActionListener {
         Sprite playeSprite = new Sprite(player.x, player.y, "src/resources/player.gif");
         Rectangle playerRect = playeSprite.getBounds();
         playerRect.setSize(playerRect.width/2, playerRect.height/2);
-        // g.drawRect(playerRect.x, playerRect.y, (int)playerRect.getWidth(), (int)playerRect.getHeight());
 
         for (Character enemy : enemys) {
             Sprite enemySprite = new Sprite(enemy.x, enemy.y, "src/resources/enemy.png");
@@ -318,7 +398,6 @@ public class Environment extends JPanel implements ActionListener {
             if (enemyRect.intersects(playerRect)) {
                 inGame = false;
             }
-            // g.drawRect(enemyRect.x, enemyRect.y, (int)enemyRect.getWidth(), (int)enemyRect.getHeight());
         }
     }
 
