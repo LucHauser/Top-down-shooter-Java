@@ -510,12 +510,12 @@ public class Environment extends JPanel implements ActionListener  {
 
         @Override
         public void mouseEntered(MouseEvent e) {
-            if (e.getButton() == MouseEvent.BUTTON1) {
-                Shoot();
-            }
-            if (e.getButton() == MouseEvent.BUTTON3 && inGame) {
-                shoots = maxShoots;
-            }
+            // if (e.getButton() == MouseEvent.BUTTON1) {
+            //     Shoot();
+            // }
+            // if (e.getButton() == MouseEvent.BUTTON3 && inGame) {
+            //     shoots = maxShoots;
+            // }
         }
 
         @Override
@@ -524,6 +524,12 @@ public class Environment extends JPanel implements ActionListener  {
 
         @Override
         public void mousePressed(MouseEvent e) {
+            if (e.getButton() == MouseEvent.BUTTON1) {
+                Shoot();
+            }
+            if (e.getButton() == MouseEvent.BUTTON3 && inGame) {
+                shoots = maxShoots;
+            }
         }
 
         @Override
