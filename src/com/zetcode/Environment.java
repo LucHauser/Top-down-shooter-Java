@@ -17,6 +17,10 @@ import java.util.Random;
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 import javax.swing.Timer;
+
+// import org.w3c.dom.events.MouseEvent;
+import java.awt.event.MouseEvent;
+
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -31,8 +35,11 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.awt.event.InputEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
-public class Environment extends JPanel implements ActionListener {
+public class Environment extends JPanel implements ActionListener  {
 
     private final int B_WIDTH = 500;
     private final int B_HEIGHT = 500;
@@ -71,6 +78,8 @@ public class Environment extends JPanel implements ActionListener {
 
     private void initBoard() {
         addKeyListener(new TAdapter());
+        // MapListener mapListener = new MapListener();
+        addMouseListener(new MapListener());
         setBackground(Color.black);
         setFocusable(true);
 
@@ -272,35 +281,24 @@ public class Environment extends JPanel implements ActionListener {
     {
         File scoreFile = new File(System.getProperty("user.dir") + "\\src\\resources\\score.txt");
         try{
-            scoreFile.createNewFile();
-            BufferedWriter wirter = new BufferedWriter(new FileWriter(scoreFile));
-            wirter.write("0");
-            wirter.close();
+            if(!scoreFile.exists()){
+                scoreFile.createNewFile();
+                BufferedWriter wirter = new BufferedWriter(new FileWriter(scoreFile));
+                wirter.write("0");
+                wirter.close();
+            }
         } catch(IOException e){
             System.out.println("Error: "+e);
         }
 
         BufferedReader reader = null;
         BufferedWriter wirter = null;
-        
+
         try{
             reader = new BufferedReader(new FileReader(scoreFile));
             String currentLine = reader.readLine();
-            // System.out.println(currentLine);
 
             wirter = new BufferedWriter(new FileWriter(scoreFile));
-
-            //  currentLine;
-
-            // if (currentLine == null)
-            // {
-            //     System.out.println(currentLine);
-            //     System.out.println(scoreFile);
-                
-            //     wirter.write(score.toString());
-            //     // System.out.println("null");
-            //     return score;
-            // }
 
             Integer highscore = Integer.parseInt(currentLine);
 
@@ -495,6 +493,34 @@ public class Environment extends JPanel implements ActionListener {
                     restart();
                 }
             }
+        }
+    }
+
+    public class MapListener implements MouseListener{
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            if (e.getButton() == MouseEvent.BUTTON1) {
+                Shoot();
+            }
+            if (e.getButton() == MouseEvent.BUTTON3 && inGame) {
+                shoots = maxShoots;
+            }
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+        }
+
+        @Override
+        public void mouseExited(MouseEvent arg0) {
+        }
+
+        @Override
+        public void mousePressed(MouseEvent e) {
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent arg0) {
         }
     }
 }
