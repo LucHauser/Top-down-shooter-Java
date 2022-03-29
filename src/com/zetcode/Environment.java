@@ -152,6 +152,7 @@ public class Environment extends JPanel implements ActionListener  {
     {
         if (inGame) {
             ArrayList<Explosion> explosionsToDestroy = new ArrayList<Explosion>();
+            ArrayList<Character> enemysToDestroy = new ArrayList<Character>();
             for (Explosion explosion : explosions) {
                 try {
                     BufferedImage originalImage = ImageIO.read(new File(explosion.currentPath()));
@@ -170,9 +171,19 @@ public class Environment extends JPanel implements ActionListener  {
                 {
                     inGame = false;
                 }
+
+                for (Character enemy : enemys) {
+                    if (getDistance(enemy.x, enemy.y, explosion.getX(), explosion.getY()) < explosion.getDeathRadius())
+                    {
+                        enemysToDestroy.add(enemy);
+                    }
+                }
             }
             for (Explosion explosion : explosionsToDestroy) {
                 explosions.remove(explosion);
+            }
+            for (Character enemy : enemysToDestroy) {
+                enemys.remove(enemy);
             }
         }
     }
@@ -216,7 +227,6 @@ public class Environment extends JPanel implements ActionListener  {
                 {
                     if (getDistance(player.x, player.y, enemy.x, enemy.y) < throwDistance)
                     {
-                        System.out.println("Throw granade");
                         SpawnGrandes(enemy);
                         enemy.hasThrown = true;
                     }
@@ -466,7 +476,6 @@ public class Environment extends JPanel implements ActionListener  {
     {
         Explosion newExplosion = new Explosion(grande.getX(), grande.getY());
         explosions.add(newExplosion);
-        System.out.println("Exlode");
     }
 
     private boolean CheckIfOutOfMap(int x, int y, int offset)

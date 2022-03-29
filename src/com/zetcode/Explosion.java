@@ -12,7 +12,7 @@ public class Explosion {
     private double duration = 5;
     private double evry;
     private boolean isFinished;
-    private double deathRadius = 50;
+    private double deathRadius = 40;
 
     private ArrayList<String> paths = new ArrayList<String>();
     Timer timer = new Timer(true);
