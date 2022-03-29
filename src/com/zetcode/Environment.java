@@ -328,6 +328,7 @@ public class Environment extends JPanel implements ActionListener  {
         }
         String highscoreText = "HIGHSCORE: " + highscore;
         String restartText = "Press R to restart";
+        String exitText = "Press X to exit the game";
         Font big = new Font("Helvetica", Font.BOLD, 50);
         FontMetrics metr = getFontMetrics(big);
         Font small = new Font("Helvetica", Font.BOLD, 14);
@@ -342,6 +343,7 @@ public class Environment extends JPanel implements ActionListener  {
         g.setFont(small);
         g.setColor(Color.white);
         g.drawString(restartText, (B_WIDTH - metrs.stringWidth(restartText)) / 2, B_HEIGHT / 2 + 100);
+        g.drawString(exitText, (B_WIDTH - metrs.stringWidth(exitText)) / 2, B_HEIGHT / 2 + 150);
         g.setFont(midle);
         g.setColor(Color.white);
         g.drawString(score, (B_WIDTH - midlemetrs.stringWidth(score)) / 2, B_HEIGHT / 2 -30);
