@@ -13,12 +13,12 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
-// import org.w3c.dom.events.MouseEvent;
 import java.awt.event.MouseEvent;
 
 import java.awt.Graphics2D;
@@ -26,17 +26,12 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.awt.Rectangle;
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileWriter;
-import java.io.IOException;
-import java.awt.event.InputEvent;
-import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
 public class Environment extends JPanel implements ActionListener  {
@@ -59,10 +54,14 @@ public class Environment extends JPanel implements ActionListener  {
     private int shoots = maxShoots;
     private int highscore;
     private boolean highscoreCheck = false;
+    private double chanceForGrande = 0.25;
+    private int throwDistance = 150;
 
     private ArrayList<Bullet> bullets = new ArrayList<Bullet>();
     private ArrayList<Character> enemys = new ArrayList<Character>();
     private ArrayList<Blood> bloodEffects = new ArrayList<Blood>();
+    private ArrayList<Grande> grandes = new ArrayList<Grande>();
+    private ArrayList<Explosion> explosions = new ArrayList<Explosion>();
 
     public Environment() {
 
@@ -78,7 +77,6 @@ public class Environment extends JPanel implements ActionListener  {
 
     private void initBoard() {
         addKeyListener(new TAdapter());
-        // MapListener mapListener = new MapListener();
         addMouseListener(new MapListener());
         setBackground(Color.black);
         setFocusable(true);
@@ -89,11 +87,7 @@ public class Environment extends JPanel implements ActionListener  {
 
     private void initGame() {
         player = new Character(B_WIDTH/2, B_HEIGHT/2, 0);
-        Character fEnemy = new Character(100, B_HEIGHT/2, -90);
-
-        enemys.add(fEnemy);
-        Character sEnemy = new Character(400, B_HEIGHT/2, 180);
-        enemys.add(sEnemy);
+        SetDefault();
     }
 
 
@@ -109,7 +103,6 @@ public class Environment extends JPanel implements ActionListener  {
         if (inGame) {
             for (Bullet bullet : bullets) {
                 try {
-
                     BufferedImage originalImage = ImageIO.read(new File("src/resources/round.png"));
                     BufferedImage subImage = rotateImage(originalImage, bullet.rotation);
                     bullet.updatePostion();
@@ -120,6 +113,76 @@ public class Environment extends JPanel implements ActionListener  {
             }
             checkBulletCollison();
         }
+    }
+
+    private void DrawGrandes(Graphics g)
+    {
+        if (inGame) {
+            ArrayList<Grande> grandesToDestroy = new ArrayList<Grande>();
+            for (Grande grande : grandes) {
+                try {
+                    if (grande.getThrowForce() > 0)
+                    {
+                        double newRoation = grande.getShownRotation() + 3;
+                        grande.setShownRotation(newRoation);
+                    }
+                    BufferedImage originalImage = ImageIO.read(new File("src/resources/grande1.png"));
+                    grande.setRotation(grande.getRotation()+2);
+                    BufferedImage subImage = rotateImage(originalImage, grande.getShownRotation());
+                    grande.updatePostion();
+                    grande.UpDateLifeTime();
+                    g.drawImage(subImage, grande.getX()- (int) (subImage.getWidth()*0.5), grande.getY()- (int) (subImage.getWidth()*0.5), this);
+
+                    if (grande.getLiefetime() <= 0)
+                    {
+                        SpawnExplosion(grande);
+                        grandesToDestroy.add(grande);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            for (Grande grande : grandesToDestroy) {
+                grandes.remove(grande);
+            }
+        }
+    }
+
+    private void DrawExplosions(Graphics g)
+    {
+        if (inGame) {
+            ArrayList<Explosion> explosionsToDestroy = new ArrayList<Explosion>();
+            for (Explosion explosion : explosions) {
+                try {
+                    BufferedImage originalImage = ImageIO.read(new File(explosion.currentPath()));
+                    BufferedImage subImage = rotateImage(originalImage, 0);
+                    g.drawImage(subImage, explosion.getX()- (int) (subImage.getWidth()*0.5), explosion.getY()-(int) (subImage.getHeight()*0.5), this);
+
+                    if (explosion.isFinished())
+                    {
+                        explosionsToDestroy.add(explosion);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                if (getDistance(player.x, player.y, explosion.getX(), explosion.getY()) < explosion.getDeathRadius())
+                {
+                    inGame = false;
+                }
+            }
+            for (Explosion explosion : explosionsToDestroy) {
+                explosions.remove(explosion);
+            }
+        }
+    }
+
+    private Double getDistance(int x1, int y1, int x2, int y2)
+    {
+        int distX = (int) Math.pow(x1 - x2, 2);
+        int distY = (int) Math.pow(y1 - y2, 2);
+
+        return Math.sqrt(distX + distY);
     }
 
     private void DrawEnemys(Graphics g)
@@ -135,9 +198,29 @@ public class Environment extends JPanel implements ActionListener  {
                 double dy = player.y - enemy.y;
                 enemy.rotation = (Math.toDegrees(Math.atan2(dy, dx))-90);
 
-                BufferedImage originalImage = ImageIO.read(new File("src/resources/enemy.png"));
+                BufferedImage originalImage = null;
+
+                if (!enemy.isGrande)
+                {
+                    originalImage = ImageIO.read(new File("src/resources/enemy.png"));
+                }
+                else
+                {
+                    originalImage = ImageIO.read(new File("src/resources/enemyWithGrande.png"));
+                }
+
                 BufferedImage subImage = rotateImage(originalImage, enemy.rotation);
                 g.drawImage(subImage, enemy.x, enemy.y, this);
+
+                if (enemy.isGrande && !enemy.hasThrown)
+                {
+                    if (getDistance(player.x, player.y, enemy.x, enemy.y) < throwDistance)
+                    {
+                        System.out.println("Throw granade");
+                        SpawnGrandes(enemy);
+                        enemy.hasThrown = true;
+                    }
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -189,7 +272,9 @@ public class Environment extends JPanel implements ActionListener  {
                 e.printStackTrace();
             }
             DrawEnemys(g);
+            DrawGrandes(g);
             DrawBullets(g);
+            DrawExplosions(g);
 
             String killsText = "kills: " + kills;
             String shotsText = "";
@@ -235,13 +320,13 @@ public class Environment extends JPanel implements ActionListener  {
     private void gameOver(Graphics g) {
 
         String msg = "Game Over";
-        String score = "score: " + kills;
+        String score = "SCORE: " + kills;
         if (!this.highscoreCheck)
         {
             this.highscoreCheck = true;
             highscore = SaveScore(kills);
         }
-        String highscoreText = "highscore: " + highscore;
+        String highscoreText = "HIGHSCORE: " + highscore;
         String restartText = "Press R to restart";
         Font big = new Font("Helvetica", Font.BOLD, 50);
         FontMetrics metr = getFontMetrics(big);
@@ -264,7 +349,7 @@ public class Environment extends JPanel implements ActionListener  {
         g.setFont(small);
     }
 
-    private void restart()
+    private void SetDefault()
     {
         kills = 0;
         shoots = maxShoots;
@@ -272,7 +357,12 @@ public class Environment extends JPanel implements ActionListener  {
         player.x = B_HEIGHT/2;
         bullets.clear();
         enemys.clear();
-        initGame();
+        grandes.clear();
+        explosions.clear();
+        Character fEnemy = new Character(100, B_HEIGHT/2, -90);
+        enemys.add(fEnemy);
+        Character sEnemy = new Character(400, B_HEIGHT/2, 180);
+        enemys.add(sEnemy);
         inGame = true;
         highscoreCheck = false;
         maxEnemys = 3;
@@ -347,6 +437,12 @@ public class Environment extends JPanel implements ActionListener  {
         {
             int[] randomPoint = spawnPoints[new Random().nextInt(spawnPoints.length)];
             Character newEnemy = new Character(randomPoint[0], randomPoint[1], 0);
+            ThreadLocalRandom tlr = ThreadLocalRandom.current();
+            double chance = tlr.nextDouble();
+            if (chance < chanceForGrande)
+            {
+                newEnemy.isGrande = true;
+            }
             enemys.add(newEnemy);
             counter++;
 
@@ -356,6 +452,19 @@ public class Environment extends JPanel implements ActionListener  {
                 maxEnemys++;
             }
         }
+    }
+
+    private void SpawnGrandes(Character thrower)
+    {
+        Grande newGrande = new Grande(thrower.x, thrower.y, thrower.rotation*-1-90);
+        grandes.add(newGrande);
+    }
+
+    private void SpawnExplosion(Grande grande)
+    {
+        Explosion newExplosion = new Explosion(grande.getX(), grande.getY());
+        explosions.add(newExplosion);
+        System.out.println("Exlode");
     }
 
     private boolean CheckIfOutOfMap(int x, int y, int offset)
@@ -491,7 +600,7 @@ public class Environment extends JPanel implements ActionListener  {
             else
             {
                 if ((key == KeyEvent.VK_R)) {
-                    restart();
+                    SetDefault();
                 }
             }
         }
@@ -500,22 +609,10 @@ public class Environment extends JPanel implements ActionListener  {
     public class MapListener implements MouseListener{
         @Override
         public void mouseClicked(MouseEvent e) {
-            // if (e.getButton() == MouseEvent.BUTTON1) {
-            //     Shoot();
-            // }
-            // if (e.getButton() == MouseEvent.BUTTON3 && inGame) {
-            //     shoots = maxShoots;
-            // }
         }
 
         @Override
         public void mouseEntered(MouseEvent e) {
-            // if (e.getButton() == MouseEvent.BUTTON1) {
-            //     Shoot();
-            // }
-            // if (e.getButton() == MouseEvent.BUTTON3 && inGame) {
-            //     shoots = maxShoots;
-            // }
         }
 
         @Override
