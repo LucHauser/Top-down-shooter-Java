@@ -55,7 +55,7 @@ public class Environment extends JPanel implements ActionListener  {
     private int highscore;
     private boolean highscoreCheck = false;
     private double chanceForGrande = 0.25;
-    private int throwDistance = 150;
+    private int throwDistance = 180;
 
     private ArrayList<Bullet> bullets = new ArrayList<Bullet>();
     private ArrayList<Character> enemys = new ArrayList<Character>();

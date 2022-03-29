@@ -6,8 +6,8 @@ public class Grande {
     private double rotation;
     private double shownRotation = rotation;
     private double liefetime = 50;
-    private double throwForce = 8;
-    private double gravity = 0.5;
+    private double throwForce = 12;
+    private double gravity = 0.9;
 
     public double getShownRotation() {
         return shownRotation;
