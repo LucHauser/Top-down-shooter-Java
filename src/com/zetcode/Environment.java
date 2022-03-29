@@ -336,11 +336,11 @@ public class Environment extends JPanel implements ActionListener  {
         FontMetrics midlemetrs = getFontMetrics(midle);
 
         g.setColor(Color.white);
-        setBackground(Color.red);
+        // setBackground(new Color(0,0,0,1));
         g.setFont(big);
         g.drawString(msg, (B_WIDTH - metr.stringWidth(msg)) / 2, B_HEIGHT / 2 -100);
         g.setFont(small);
-        g.setColor(Color.black);
+        g.setColor(Color.white);
         g.drawString(restartText, (B_WIDTH - metrs.stringWidth(restartText)) / 2, B_HEIGHT / 2 + 100);
         g.setFont(midle);
         g.setColor(Color.white);
