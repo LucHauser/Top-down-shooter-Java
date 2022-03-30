@@ -230,7 +230,7 @@ public class Environment extends JPanel implements ActionListener  {
                     e.printStackTrace();
                 }
 
-                if (getDistance(player.x, player.y, explosion.getX(), explosion.getY()) < explosion.getDeathRadius())
+                if (getDistance(player.x+xPlayerCenterOffset, player.y+yPlayerCenterOffset, explosion.getX(), explosion.getY()) < explosion.getDeathRadius())
                 {
                     inGame = false;
                 }
@@ -675,6 +675,10 @@ public class Environment extends JPanel implements ActionListener  {
 
             if ((key == KeyEvent.VK_X)) {
                 System.exit(0);
+            }
+
+            if ((key == KeyEvent.VK_G)) {
+                SpawnGrandes(player);
             }
 
             if (inGame)
