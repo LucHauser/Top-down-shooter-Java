@@ -128,14 +128,12 @@ public class Environment extends JPanel implements ActionListener  {
     {
         if (inGame) {
             try {
-                BufferedImage originalImage = ImageIO.read(new File("src/resources/mg.png"));
+                BufferedImage originalImage = ImageIO.read(new File(weapon.getImgPath()));
                 BufferedImage subImage = rotateImage(originalImage, player.rotation);
-                
-                BufferedImage originalImage2 = ImageIO.read(new File("src/resources/player.gif"));
-                BufferedImage subImage2 = rotateImage(originalImage2, player.rotation);
+
                 int offset = 24;
-                int drawXPos = player.x-(int)(originalImage.getWidth()*0.5) + (int)(originalImage2.getWidth()*0.5) + (int)(offset*Math.sin(Math.toRadians((-1*player.rotation + 48))));
-                int drawYPos = player.y-(int)(originalImage.getHeight()*0.5) + (int)(originalImage2.getHeight()*0.5) + (int)(offset*Math.sin(Math.toRadians(90-(-1*player.rotation+ 48))));
+                int drawXPos = player.x-(int)(originalImage.getWidth()*0.5) + (int)xPlayerCenterOffset + (int)(offset*Math.sin(Math.toRadians((-1*player.rotation + 48))));
+                int drawYPos = player.y-(int)(originalImage.getHeight()*0.5) + (int)yPlayerCenterOffset + (int)(offset*Math.sin(Math.toRadians(90-(-1*player.rotation+ 48))));
                 g.drawImage(subImage, drawXPos, drawYPos, this);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -313,7 +311,7 @@ public class Environment extends JPanel implements ActionListener  {
             DrawEnemys(g);
             DrawGrandes(g);
             DrawBullets(g);
-            DrawWeapon(g);
+            // DrawWeapon(g);
             DrawExplosions(g);
 
             String killsText = "kills: " + kills;
@@ -466,8 +464,8 @@ public class Environment extends JPanel implements ActionListener  {
             bullets.add(bullet);
             shoots--;
 
-            bullet.y += (-24*Math.sin(Math.toRadians(bullet.rotation-30)));
-            bullet.x += (24*Math.sin(Math.toRadians(90-bullet.rotation+30)));
+            bullet.y += (-24*Math.sin(Math.toRadians(bullet.rotation-35)));
+            bullet.x += (24*Math.sin(Math.toRadians(90-bullet.rotation+35)));
         }
     }
 

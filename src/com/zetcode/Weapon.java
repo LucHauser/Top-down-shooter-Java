@@ -32,4 +32,8 @@ public class Weapon {
     public double getRotation() {
         return rotation;
     }
+
+    public String getImgPath() {
+        return imgPath;
+    }
 }
