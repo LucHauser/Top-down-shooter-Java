@@ -42,6 +42,8 @@ public class Environment extends JPanel implements ActionListener  {
     private final int DELAY = 40;
 
     private Character player;
+    private int xPlayerCenterOffset;
+    private int yPlayerCenterOffset;
     private boolean inGame = true;
 
     private int maxEnemys = 3;
@@ -56,6 +58,7 @@ public class Environment extends JPanel implements ActionListener  {
     private boolean highscoreCheck = false;
     private double chanceForGrande = 0.25;
     private int throwDistance = 180;
+    private Weapon weapon;
 
     private ArrayList<Bullet> bullets = new ArrayList<Bullet>();
     private ArrayList<Character> enemys = new ArrayList<Character>();
@@ -87,6 +90,12 @@ public class Environment extends JPanel implements ActionListener  {
 
     private void initGame() {
         player = new Character(B_WIDTH/2, B_HEIGHT/2, 0);
+        try {
+            xPlayerCenterOffset = (int) (ImageIO.read(new File("src/resources/player.gif")).getWidth()*0.5);
+            yPlayerCenterOffset = (int) (ImageIO.read(new File("src/resources/player.gif")).getHeight()*0.5);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         SetDefault();
     }
 
@@ -114,6 +123,26 @@ public class Environment extends JPanel implements ActionListener  {
             checkBulletCollison();
         }
     }
+
+    private void DrawWeapon(Graphics g)
+    {
+        if (inGame) {
+            try {
+                BufferedImage originalImage = ImageIO.read(new File("src/resources/mg.png"));
+                BufferedImage subImage = rotateImage(originalImage, player.rotation);
+                
+                BufferedImage originalImage2 = ImageIO.read(new File("src/resources/player.gif"));
+                BufferedImage subImage2 = rotateImage(originalImage2, player.rotation);
+                int offset = 24;
+                int drawXPos = player.x-(int)(originalImage.getWidth()*0.5) + (int)(originalImage2.getWidth()*0.5) + (int)(offset*Math.sin(Math.toRadians((-1*player.rotation + 48))));
+                int drawYPos = player.y-(int)(originalImage.getHeight()*0.5) + (int)(originalImage2.getHeight()*0.5) + (int)(offset*Math.sin(Math.toRadians(90-(-1*player.rotation+ 48))));
+                g.drawImage(subImage, drawXPos, drawYPos, this);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 
     private void DrawGrandes(Graphics g)
     {
@@ -270,9 +299,9 @@ public class Environment extends JPanel implements ActionListener  {
                 int x = (screenSize.width/ 2) - B_WIDTH/2;
                 int y = (screenSize.height/ 2) - B_HEIGHT/2;
                 mX -= x;
-                mY -= y -20;
-                double dx = mX - player.x - 30;
-                double dy = mY - player.y - 25;
+                mY -= y-20;
+                double dx = mX - player.x - xPlayerCenterOffset;
+                double dy = mY - player.y - yPlayerCenterOffset;
                 player.rotation = (Math.toDegrees(Math.atan2(dy, dx)));
 
                 BufferedImage originalImage = ImageIO.read(new File("src/resources/player.gif"));
@@ -284,6 +313,7 @@ public class Environment extends JPanel implements ActionListener  {
             DrawEnemys(g);
             DrawGrandes(g);
             DrawBullets(g);
+            DrawWeapon(g);
             DrawExplosions(g);
 
             String killsText = "kills: " + kills;
@@ -377,7 +407,8 @@ public class Environment extends JPanel implements ActionListener  {
         enemys.add(sEnemy);
         inGame = true;
         highscoreCheck = false;
-        maxEnemys = 3;
+        maxEnemys = 0;
+        weapon = new Weapon();
     }
 
     int SaveScore(Integer score)
@@ -431,10 +462,7 @@ public class Environment extends JPanel implements ActionListener  {
     {
         if (shoots > 0)
         {
-            int xOffest = 60/2;
-            int yOffset = 50/2;
-
-            Bullet bullet = new Bullet(player.x + xOffest, player.y + yOffset, player.rotation*-1);
+            Bullet bullet = new Bullet(player.x + xPlayerCenterOffset, player.y + yPlayerCenterOffset, player.rotation*-1);
             bullets.add(bullet);
             shoots--;
 

@@ -6,7 +6,7 @@ import javax.swing.ImageIcon;
 
 public class Sprite {
 
-    private String path = "";
+    private String path = null;
     private int x, y;
     private Image image;
     boolean visible;
