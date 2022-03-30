@@ -445,8 +445,6 @@ public class Environment extends JPanel implements ActionListener  {
         spawnPoints.clear();
         Character fEnemy = new Character(100, B_WIDTH/2, -90);
         enemys.add(fEnemy);
-        // Character sEnemy = new Character(400, B_HEIGHT/2, 180);
-        // enemys.add(sEnemy);
         inGame = true;
         highscoreCheck = false;
         maxEnemys = 9;
