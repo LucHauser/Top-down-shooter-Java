@@ -26,6 +26,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.awt.Rectangle;
 import java.awt.MouseInfo;
 import java.awt.Point;
@@ -48,7 +49,7 @@ public class Environment extends JPanel implements ActionListener  {
 
     private int maxEnemys = 3;
     // private int[][] spawnPoints = {{-0,-0},{500,-0},{0,500},{500,500},{0,250},{250,0},{250,500},{500,250}};
-    private int[][] spawnPoints = {{0,0},{B_WIDTH,0},{0,B_HEIGHT},{B_WIDTH,B_HEIGHT},{0,(int)(B_HEIGHT*0.5)},{(int)(B_WIDTH*0.5),0},{(int)(B_WIDTH*0.5),B_HEIGHT},{B_WIDTH,(int)(B_HEIGHT*0.5)}};
+    private int[][] defaultSpawnPoints = {{0,0},{B_WIDTH,0},{0,B_HEIGHT},{B_WIDTH,B_HEIGHT},{0,(int)(B_HEIGHT*0.5)},{(int)(B_WIDTH*0.5),0},{(int)(B_WIDTH*0.5),B_HEIGHT},{B_WIDTH,(int)(B_HEIGHT*0.5)}};
     private int mX;
     private int mY;
     private int counter = 0;
@@ -61,12 +62,15 @@ public class Environment extends JPanel implements ActionListener  {
     private int throwDistance = 400;
     private Weapon weapon;
     private double enemySpeed = 3;
+    private double spawnDistance = 100;
+    private int maxNewSpawnpoints = 3;
 
     private ArrayList<Bullet> bullets = new ArrayList<Bullet>();
     private ArrayList<Character> enemys = new ArrayList<Character>();
     private ArrayList<Blood> bloodEffects = new ArrayList<Blood>();
     private ArrayList<Grande> grandes = new ArrayList<Grande>();
     private ArrayList<Explosion> explosions = new ArrayList<Explosion>();
+    private ArrayList<Spawnpoint> spawnPoints = new ArrayList<Spawnpoint>();
 
     public Environment() {
 
@@ -110,6 +114,25 @@ public class Environment extends JPanel implements ActionListener  {
         SpawnEnemys();
     }
 
+    private void GenerateSpawnpoint()
+    {
+        boolean spawn = true;
+        while (spawn)
+        {
+            ThreadLocalRandom tlr = ThreadLocalRandom.current();
+            int x = tlr.nextInt(0,B_WIDTH);
+            int y = tlr.nextInt(0,B_HEIGHT);
+
+            if (getDistance(x, y, player.x, player.y) >= spawnDistance)
+            {
+                Spawnpoint newSp = new Spawnpoint(x, y);
+                spawnPoints.add(newSp);
+                spawn = false;
+            }
+        }
+
+    }
+
     private void DrawBullets(Graphics g)
     {
         if (inGame) {
@@ -124,6 +147,16 @@ public class Environment extends JPanel implements ActionListener  {
                 }
             }
             checkBulletCollison();
+        }
+    }
+
+    private void DrawSpawnpoints(Graphics g)
+    {
+        if (inGame) {
+            for (Spawnpoint spawnpoint : spawnPoints) {
+                Image img= Toolkit.getDefaultToolkit().getImage("src\\resources\\spawnpoint.png");
+                g.drawImage(img, spawnpoint.getX(), spawnpoint.getY(), null);
+            }
         }
     }
 
@@ -317,6 +350,7 @@ public class Environment extends JPanel implements ActionListener  {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            DrawSpawnpoints(g);
             DrawEnemys(g);
             DrawGrandes(g);
             DrawBullets(g);
@@ -408,14 +442,21 @@ public class Environment extends JPanel implements ActionListener  {
         enemys.clear();
         grandes.clear();
         explosions.clear();
-        Character fEnemy = new Character(100, B_HEIGHT/2, -90);
+        spawnPoints.clear();
+        Character fEnemy = new Character(100, B_WIDTH/2, -90);
         enemys.add(fEnemy);
-        Character sEnemy = new Character(400, B_HEIGHT/2, 180);
-        enemys.add(sEnemy);
+        // Character sEnemy = new Character(400, B_HEIGHT/2, 180);
+        // enemys.add(sEnemy);
         inGame = true;
         highscoreCheck = false;
         maxEnemys = 9;
         weapon = new Weapon();
+        for (int[] spawnPoint : defaultSpawnPoints) {
+            spawnPoints.add(new Spawnpoint(spawnPoint[0], spawnPoint[1]));
+        }
+        for (int i = 0; i < maxNewSpawnpoints; i++) {
+            GenerateSpawnpoint();
+        }
     }
 
     int SaveScore(Integer score)
@@ -482,9 +523,10 @@ public class Environment extends JPanel implements ActionListener  {
     {
         if (enemys.size() < maxEnemys)
         {
-            int[] randomPoint = spawnPoints[new Random().nextInt(spawnPoints.length)];
-            Character newEnemy = new Character(randomPoint[0], randomPoint[1], 0);
             ThreadLocalRandom tlr = ThreadLocalRandom.current();
+            int randomIndex = tlr.nextInt(0, spawnPoints.size());
+            Spawnpoint sp = spawnPoints.get(randomIndex);
+            Character newEnemy = new Character(sp.getX(), sp.getY(), 0);
             double chance = tlr.nextDouble();
             if (chance < chanceForGrande)
             {
@@ -599,7 +641,6 @@ public class Environment extends JPanel implements ActionListener  {
 
     private boolean canPlayerMoveToThisPosition(int x, int y)
     {
-        System.out.println(y > -2*DOT_SIZE);
         if (x < 0 || y < 0 || x > B_WIDTH-2*DOT_SIZE || y > B_HEIGHT-2*DOT_SIZE)
         {
             return false;
