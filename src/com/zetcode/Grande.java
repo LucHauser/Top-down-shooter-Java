@@ -6,7 +6,7 @@ public class Grande {
     private double rotation;
     private double shownRotation = rotation;
     private double liefetime = 50;
-    private double throwForce = 12;
+    private double throwForce = 20;
     private double gravity = 0.9;
 
     public double getShownRotation() {
@@ -28,7 +28,7 @@ public class Grande {
     public Grande(int x, int y, double rotation) {
         this.x = x;
         this.y = y;
-        this.rotation = rotation;
+        this.rotation = rotation-20;
     }
 
     public double getLiefetime() {

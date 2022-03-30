@@ -7,7 +7,7 @@ public class Bullet {
     public double xOffset = 0;
     public double yOffet = 0;
 
-    private double bulletSpeed = 3;
+    private double bulletSpeed = 10;
 
     public Bullet(int x, int y, double rotation)
     {

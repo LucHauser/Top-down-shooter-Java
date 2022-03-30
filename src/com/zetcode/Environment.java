@@ -36,8 +36,8 @@ import java.awt.event.MouseListener;
 
 public class Environment extends JPanel implements ActionListener  {
 
-    private final int B_WIDTH = 500;
-    private final int B_HEIGHT = 500;
+    private final int B_WIDTH = (int)Toolkit.getDefaultToolkit().getScreenSize().getWidth();
+    private final int B_HEIGHT = (int)Toolkit.getDefaultToolkit().getScreenSize().getHeight();
     private final int DOT_SIZE = 25;
     private final int DELAY = 40;
 
@@ -47,7 +47,8 @@ public class Environment extends JPanel implements ActionListener  {
     private boolean inGame = true;
 
     private int maxEnemys = 3;
-    private int[][] spawnPoints = {{-0,-0},{500,-0},{0,500},{500,500},{0,250},{250,0},{250,500},{500,250}};
+    // private int[][] spawnPoints = {{-0,-0},{500,-0},{0,500},{500,500},{0,250},{250,0},{250,500},{500,250}};
+    private int[][] spawnPoints = {{0,0},{B_WIDTH,0},{0,B_HEIGHT},{B_WIDTH,B_HEIGHT},{0,(int)(B_HEIGHT*0.5)},{(int)(B_WIDTH*0.5),0},{(int)(B_WIDTH*0.5),B_HEIGHT},{B_WIDTH,(int)(B_HEIGHT*0.5)}};
     private int mX;
     private int mY;
     private int counter = 0;
@@ -57,8 +58,9 @@ public class Environment extends JPanel implements ActionListener  {
     private int highscore;
     private boolean highscoreCheck = false;
     private double chanceForGrande = 0.25;
-    private int throwDistance = 180;
+    private int throwDistance = 400;
     private Weapon weapon;
+    private double enemySpeed = 3;
 
     private ArrayList<Bullet> bullets = new ArrayList<Bullet>();
     private ArrayList<Character> enemys = new ArrayList<Character>();
@@ -79,6 +81,7 @@ public class Environment extends JPanel implements ActionListener  {
     }
 
     private void initBoard() {
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         addKeyListener(new TAdapter());
         addMouseListener(new MapListener());
         setBackground(Color.black);
@@ -229,8 +232,8 @@ public class Environment extends JPanel implements ActionListener  {
             checkPlayerCollsison(g);
 
             for (Character enemy : enemys) {
-                enemy.y -= (2*Math.sin(Math.toRadians(enemy.rotation-90)));
-                enemy.x -= (2*Math.sin(Math.toRadians(enemy.rotation)));
+                enemy.y -= (enemySpeed*Math.sin(Math.toRadians(enemy.rotation-90)));
+                enemy.x -= (enemySpeed*Math.sin(Math.toRadians(enemy.rotation)));
 
                 double dx = player.x - enemy.x;
                 double dy = player.y - enemy.y;
@@ -285,8 +288,14 @@ public class Environment extends JPanel implements ActionListener  {
 
     private void doDrawing(Graphics g) {
         if (inGame) {
-            Image bg = Toolkit.getDefaultToolkit().getImage("src/resources/ground.jpg");
-            g.drawImage(bg, 0, 0, null);
+            Image bgTile= Toolkit.getDefaultToolkit().getImage("src\\resources\\gTile.jpg");
+            for (int i = 0; i < B_WIDTH; i += 250)
+            {
+                for (int j = 0; j < B_HEIGHT; j += 250)
+                {
+                    g.drawImage(bgTile, i, j, null);
+                }
+            }
 
             try {
                 Point mousPos = MouseInfo.getPointerInfo().getLocation();
@@ -405,7 +414,7 @@ public class Environment extends JPanel implements ActionListener  {
         enemys.add(sEnemy);
         inGame = true;
         highscoreCheck = false;
-        maxEnemys = 0;
+        maxEnemys = 9;
         weapon = new Weapon();
     }
 
@@ -590,7 +599,9 @@ public class Environment extends JPanel implements ActionListener  {
 
     private boolean canPlayerMoveToThisPosition(int x, int y)
     {
-        if (x < 0 || y < 0 || x > 450 || y > 450)
+        System.out.println(B_HEIGHT-2*DOT_SIZE);
+        System.out.println(y > -2*DOT_SIZE);
+        if (x < 0 || y < 0 || x > B_WIDTH-2*DOT_SIZE || y > B_HEIGHT-2*DOT_SIZE)
         {
             return false;
         }
