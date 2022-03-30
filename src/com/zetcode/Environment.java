@@ -599,7 +599,6 @@ public class Environment extends JPanel implements ActionListener  {
 
     private boolean canPlayerMoveToThisPosition(int x, int y)
     {
-        System.out.println(B_HEIGHT-2*DOT_SIZE);
         System.out.println(y > -2*DOT_SIZE);
         if (x < 0 || y < 0 || x > B_WIDTH-2*DOT_SIZE || y > B_HEIGHT-2*DOT_SIZE)
         {
