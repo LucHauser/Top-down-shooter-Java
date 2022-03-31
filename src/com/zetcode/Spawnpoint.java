@@ -4,10 +4,12 @@ public class Spawnpoint {
 
     private int x;
     private int y;
+    private boolean canSpawn;
 
     public Spawnpoint(int x, int y) {
         this.x = x;
         this.y = y;
+        canSpawn = true;
     }
     public int getX() {
         return x;
@@ -21,4 +23,12 @@ public class Spawnpoint {
     public void setY(int y) {
         this.y = y;
     }
+    public boolean canSpawn() {
+        return canSpawn;
+    }
+    public void setCanSpawn(boolean canSpawn) {
+        this.canSpawn = canSpawn;
+    }
+
+    
 }

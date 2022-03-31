@@ -26,7 +26,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.awt.Rectangle;
 import java.awt.MouseInfo;
 import java.awt.Point;
@@ -85,7 +84,6 @@ public class Environment extends JPanel implements ActionListener  {
     }
 
     private void initBoard() {
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         addKeyListener(new TAdapter());
         addMouseListener(new MapListener());
         setBackground(Color.black);
@@ -156,6 +154,14 @@ public class Environment extends JPanel implements ActionListener  {
             for (Spawnpoint spawnpoint : spawnPoints) {
                 Image img= Toolkit.getDefaultToolkit().getImage("src\\resources\\spawnpoint.png");
                 g.drawImage(img, spawnpoint.getX(), spawnpoint.getY(), null);
+                if (getDistance(player.x, player.y, spawnpoint.getX(), spawnpoint.getY()) >= spawnDistance)
+                {
+                    spawnpoint.setCanSpawn(true);
+                }
+                else
+                {
+                    spawnpoint.setCanSpawn(false);
+                }
             }
         }
     }
@@ -521,9 +527,18 @@ public class Environment extends JPanel implements ActionListener  {
     {
         if (enemys.size() < maxEnemys)
         {
+            boolean usableSpawonpoint = false;
             ThreadLocalRandom tlr = ThreadLocalRandom.current();
-            int randomIndex = tlr.nextInt(0, spawnPoints.size());
-            Spawnpoint sp = spawnPoints.get(randomIndex);
+            Spawnpoint sp = null;
+            while (!usableSpawonpoint)
+            {
+                int randomIndex = tlr.nextInt(0, spawnPoints.size());
+                sp = spawnPoints.get(randomIndex);
+                if (sp.canSpawn())
+                {
+                    usableSpawonpoint = true;
+                }
+            }
             Character newEnemy = new Character(sp.getX(), sp.getY(), 0);
             double chance = tlr.nextDouble();
             if (chance < chanceForGrande)
