@@ -44,6 +44,7 @@ public class Environment extends JPanel implements ActionListener  {
     private int xPlayerCenterOffset;
     private int yPlayerCenterOffset;
     private boolean inGame = true;
+    private boolean ispressed = false;
 
     private int maxEnemys = 3;
     private int[][] defaultSpawnPoints = {{0,0},{B_WIDTH,0},{0,B_HEIGHT},{B_WIDTH,B_HEIGHT},{0,(int)(B_HEIGHT*0.5)},{(int)(B_WIDTH*0.5),0},{(int)(B_WIDTH*0.5),B_HEIGHT},{B_WIDTH,(int)(B_HEIGHT*0.5)}};
@@ -380,6 +381,10 @@ public class Environment extends JPanel implements ActionListener  {
             }
             g.drawString(shotsText, (B_WIDTH - metr.stringWidth(shotsText)), 20);
 
+            if (ispressed)
+            {
+                Shoot();
+            }
             Toolkit.getDefaultToolkit().sync();
         } else {
 
@@ -689,9 +694,9 @@ public class Environment extends JPanel implements ActionListener  {
                 if (canPlayerMoveToThisPosition(player.x, player.y + DOT_SIZE)) {player.y += DOT_SIZE;}
             }
 
-            if ((key == KeyEvent.VK_SPACE)) {
-                Shoot();
-            }
+            // if ((key == KeyEvent.VK_SPACE)) {
+            //     Shoot();
+            // }
 
             if ((key == KeyEvent.VK_X)) {
                 System.exit(0);
@@ -739,7 +744,12 @@ public class Environment extends JPanel implements ActionListener  {
         @Override
         public void mousePressed(MouseEvent e) {
             if (e.getButton() == MouseEvent.BUTTON1) {
-                Shoot();
+                if(weapon.getIsFUllauto()){
+                    ispressed = true;
+                } else {
+                    Shoot();
+                }
+                System.out.println("pressed");
             }
             if (e.getButton() == MouseEvent.BUTTON3 && inGame) {
                 weapon.setCurrentShoot(weapon.getMaxShoots());
@@ -748,6 +758,13 @@ public class Environment extends JPanel implements ActionListener  {
 
         @Override
         public void mouseReleased(MouseEvent arg0) {
+            System.out.println("releaded");
+            if (arg0.getButton() == MouseEvent.BUTTON1) {
+                // Shoot();
+                if(weapon.getIsFUllauto()){
+                    ispressed = false;
+                }
+            }
         }
     }
 }

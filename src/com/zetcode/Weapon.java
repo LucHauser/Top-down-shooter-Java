@@ -10,6 +10,11 @@ public class Weapon {
     private int currentShoot = 200;
     private int[] bulletOffset = {24, 40};
     private double[] bulletRotationOffset = {35, 23};
+    private boolean[] isFUllauto = {false, true};
+
+    public int getCurrentWeapon(){
+        return currentWeapon;
+    }
 
     public void setCurrentWeapon(int currentWeapon) {
         this.currentWeapon = currentWeapon;
@@ -46,5 +51,9 @@ public class Weapon {
 
     public double getBulletRotationOffset() {
         return bulletRotationOffset[currentWeapon];
+    }
+
+    public boolean getIsFUllauto() {
+        return isFUllauto[currentWeapon];
     }
 }
