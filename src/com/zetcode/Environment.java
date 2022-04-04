@@ -60,6 +60,11 @@ public class Environment extends JPanel implements ActionListener  {
     private double enemySpeed = 3;
     private double spawnDistance = 100;
     private int maxNewSpawnpoints = 3;
+    private int maxDimonds = 4;
+    private DimondSpawner dimondSpawner = null;
+    private int dimondCollectDistance = 25;
+    private int currentDiamonds = 0;
+    private int price = 20;
 
     private ArrayList<Bullet> bullets = new ArrayList<Bullet>();
     private ArrayList<Character> enemys = new ArrayList<Character>();
@@ -67,6 +72,7 @@ public class Environment extends JPanel implements ActionListener  {
     private ArrayList<Grande> grandes = new ArrayList<Grande>();
     private ArrayList<Explosion> explosions = new ArrayList<Explosion>();
     private ArrayList<Spawnpoint> spawnPoints = new ArrayList<Spawnpoint>();
+    private ArrayList<Diamond> diamonds = new ArrayList<Diamond>();
 
     public Environment() {
 
@@ -361,8 +367,24 @@ public class Environment extends JPanel implements ActionListener  {
             DrawWeapon(g);
             DrawExplosions(g);
 
+            Image dimondImg= Toolkit.getDefaultToolkit().getImage("src\\resources\\dimond.png");
+            ArrayList<Diamond> diamondsToDestroy = new ArrayList<Diamond>();
+            for (Diamond diamond : diamonds) {
+                g.drawImage(dimondImg, diamond.getX()-(int)(dimondImg.getWidth(null)*0.5), diamond.getY()-(int)(dimondImg.getHeight(null)*0.5), null);
+                if (getDistance(player.x+xPlayerCenterOffset, player.y+yPlayerCenterOffset, diamond.getX(), diamond.getY()) <= dimondCollectDistance)
+                {
+                    diamondsToDestroy.add(diamond);
+                    currentDiamonds++;
+                }
+            }
+
+            for (Diamond dimond : diamondsToDestroy) {
+                diamonds.remove(dimond);
+            }
+
             String killsText = "kills: " + kills;
             String shotsText = "";
+            String diamondsText = "Diamonds: " + currentDiamonds;
             Font small = new Font("Helvetica", Font.BOLD, 14);
             FontMetrics metr = getFontMetrics(small);
 
@@ -380,6 +402,8 @@ public class Environment extends JPanel implements ActionListener  {
                 g.setColor(Color.red);
             }
             g.drawString(shotsText, (B_WIDTH - metr.stringWidth(shotsText)), 20);
+            g.setColor(new Color(255, 48, 16));
+            g.drawString(diamondsText, (B_WIDTH - metr.stringWidth(diamondsText)), 60);
 
             if (ispressed)
             {
@@ -389,6 +413,15 @@ public class Environment extends JPanel implements ActionListener  {
         } else {
 
             gameOver(g);
+        }
+    }
+
+    public void SpawnDiamond()
+    {
+        if (diamonds.size() <= maxDimonds)
+        {
+            ThreadLocalRandom tlr = ThreadLocalRandom.current();
+            diamonds.add(new Diamond(tlr.nextInt(100, B_WIDTH-100), tlr.nextInt(100, B_HEIGHT-100)));
         }
     }
 
@@ -415,9 +448,14 @@ public class Environment extends JPanel implements ActionListener  {
             this.highscoreCheck = true;
             highscore = SaveScore(kills);
         }
+        String dimondsText = "Diamonds: " + currentDiamonds;
+        SaveDiamonds();
         String highscoreText = "HIGHSCORE: " + highscore;
         String restartText = "Press R to restart";
         String exitText = "Press X to exit the game";
+        String gunText = "MINI GUN";
+        String priceText = price + " Diamonds";
+        String buyText = "Press B to buy";
         Font big = new Font("Helvetica", Font.BOLD, 50);
         FontMetrics metr = getFontMetrics(big);
         Font small = new Font("Helvetica", Font.BOLD, 14);
@@ -426,24 +464,40 @@ public class Environment extends JPanel implements ActionListener  {
         FontMetrics midlemetrs = getFontMetrics(midle);
 
         g.setColor(Color.white);
-        // setBackground(new Color(0,0,0,1));
         g.setFont(big);
-        g.drawString(msg, (B_WIDTH - metr.stringWidth(msg)) / 2, B_HEIGHT / 2 -100);
+        g.drawString(msg, (B_WIDTH - metr.stringWidth(msg)) / 2, B_HEIGHT / 2 -260);
         g.setFont(small);
         g.setColor(Color.white);
-        g.drawString(restartText, (B_WIDTH - metrs.stringWidth(restartText)) / 2, B_HEIGHT / 2 + 100);
-        g.drawString(exitText, (B_WIDTH - metrs.stringWidth(exitText)) / 2, B_HEIGHT / 2 + 150);
+        g.drawString(restartText, (B_WIDTH - metrs.stringWidth(restartText)) / 2, B_HEIGHT / 2 + 200);
+        g.drawString(exitText, (B_WIDTH - metrs.stringWidth(exitText)) / 2, B_HEIGHT / 2 + 250);
         g.setFont(midle);
         g.setColor(Color.white);
-        g.drawString(score, (B_WIDTH - midlemetrs.stringWidth(score)) / 2, B_HEIGHT / 2 -30);
-        g.drawString(highscoreText, (B_WIDTH - midlemetrs.stringWidth(highscoreText)) / 2, B_HEIGHT / 2 + 20);
+        g.drawString(score, (B_WIDTH - midlemetrs.stringWidth(score)) / 2, B_HEIGHT / 2 -180);
+        g.drawString(highscoreText, (B_WIDTH - midlemetrs.stringWidth(highscoreText)) / 2, B_HEIGHT / 2 - 140);
+        g.drawString(dimondsText, (B_WIDTH - midlemetrs.stringWidth(dimondsText)) / 2, B_HEIGHT / 2 - 100);
         g.setFont(small);
+        Image gun= Toolkit.getDefaultToolkit().getImage("src\\resources\\mg.png");
+        Image bgGun = Toolkit.getDefaultToolkit().getImage("src\\resources\\bgGun.png");
+        g.drawImage(bgGun, (int)(B_WIDTH*0.5-bgGun.getWidth(null)/2), (int)(B_HEIGHT*0.5-bgGun.getHeight(null)/2), bgGun.getWidth(null), bgGun.getHeight(null), null);
+        g.drawImage(gun, (int)(B_WIDTH*0.5-gun.getWidth(null)*3/2-30), (int)(B_HEIGHT*0.5-gun.getHeight(null)*3/2), gun.getWidth(null)*3, gun.getHeight(null)*3, null);
+        g.setColor(new Color(183, 94, 255));
+        g.drawString(gunText, (B_WIDTH - midlemetrs.stringWidth(gunText)+10) / 2, B_HEIGHT / 2 - 30);
+        g.setColor(new Color(131, 94, 255));
+        g.drawString(priceText, (B_WIDTH - midlemetrs.stringWidth(priceText)+70) / 2, B_HEIGHT / 2 + 45);
+        g.setColor(new Color(255, 164, 94));
+        g.drawString(buyText, (B_WIDTH - midlemetrs.stringWidth(buyText)+100) / 2, B_HEIGHT / 2 + 100);
+        if (isBought())
+        {
+            System.out.println("Ndsjfd");
+        }
     }
 
     private void SetDefault()
     {
         kills = 0;
+        currentDiamonds = getDimonds();
         weapon = new Weapon();
+        dimondSpawner = new DimondSpawner(this);
         weapon.setCurrentShoot(weapon.getMaxShoots());
         player.x = B_WIDTH/2;
         player.x = B_HEIGHT/2;
@@ -452,6 +506,7 @@ public class Environment extends JPanel implements ActionListener  {
         grandes.clear();
         explosions.clear();
         spawnPoints.clear();
+        diamonds.clear();
         Character fEnemy = new Character(100, B_WIDTH/2, -90);
         enemys.add(fEnemy);
         inGame = true;
@@ -462,6 +517,78 @@ public class Environment extends JPanel implements ActionListener  {
         }
         for (int i = 0; i < maxNewSpawnpoints; i++) {
             GenerateSpawnpoint();
+        }
+    }
+
+    int getDimonds()
+    {
+        File diamondFile = new File(System.getProperty("user.dir") + "\\src\\resources\\diamond.txt");
+        try{
+            if(!diamondFile.exists()){
+                diamondFile.createNewFile();
+                BufferedWriter wirter = new BufferedWriter(new FileWriter(diamondFile));
+                wirter.write("0");
+                wirter.close();
+                return 0;
+            }
+        } catch(IOException e){
+            System.out.println("Error: "+e);
+        }
+
+        BufferedReader reader = null;
+
+        try{
+            reader = new BufferedReader(new FileReader(diamondFile));
+            String currentLine = reader.readLine();
+
+            return Integer.parseInt(currentLine);
+        } catch(IOException e){
+            System.out.println("Error: "+e);
+        } finally
+        {
+            try {
+                reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return 0;
+    }
+
+    boolean isBought()
+    {
+        File bFile = new File(System.getProperty("user.dir") + "\\src\\resources\\b");
+        if(bFile.exists()){return true;}
+        else{return false;}
+    }
+
+    void buy()
+    {
+        File bFile = new File(System.getProperty("user.dir") + "\\src\\resources\\b");
+        try {
+            bFile.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void SaveDiamonds()
+    {
+        File diamondFile = new File(System.getProperty("user.dir") + "\\src\\resources\\diamond.txt");
+        BufferedWriter wirter = null;
+
+        try{
+            wirter = new BufferedWriter(new FileWriter(diamondFile));
+            wirter.write(Integer.valueOf(currentDiamonds).toString());
+        } catch(IOException e){
+            System.out.println("Error: "+e);
+        } finally
+        {
+            try {
+                wirter.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -671,6 +798,12 @@ public class Environment extends JPanel implements ActionListener  {
         return true;
     }
 
+    public void addDimond(Diamond d)
+    {
+        if (diamonds.size() >= maxDimonds) {return;}
+        diamonds.add(d);
+    }
+
     private class TAdapter extends KeyAdapter {
 
         @Override
@@ -709,7 +842,7 @@ public class Environment extends JPanel implements ActionListener  {
                 weapon.setCurrentWeapon(0);
             }
 
-            if ((key == KeyEvent.VK_2)) {
+            if ((key == KeyEvent.VK_2) && isBought()) {
                 weapon.setCurrentWeapon(1);
             }
 
@@ -723,6 +856,13 @@ public class Environment extends JPanel implements ActionListener  {
             {
                 if ((key == KeyEvent.VK_R)) {
                     SetDefault();
+                }
+
+                if ((key == KeyEvent.VK_B) && currentDiamonds >= price && !isBought())
+                {
+                    currentDiamonds -= price;
+                    SaveDiamonds();
+                    buy();
                 }
             }
         }
@@ -749,7 +889,6 @@ public class Environment extends JPanel implements ActionListener  {
                 } else {
                     Shoot();
                 }
-                System.out.println("pressed");
             }
             if (e.getButton() == MouseEvent.BUTTON3 && inGame) {
                 weapon.setCurrentShoot(weapon.getMaxShoots());
@@ -758,9 +897,7 @@ public class Environment extends JPanel implements ActionListener  {
 
         @Override
         public void mouseReleased(MouseEvent arg0) {
-            System.out.println("releaded");
             if (arg0.getButton() == MouseEvent.BUTTON1) {
-                // Shoot();
                 if(weapon.getIsFUllauto()){
                     ispressed = false;
                 }
