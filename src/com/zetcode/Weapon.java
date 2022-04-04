@@ -1,39 +1,50 @@
 package com.zetcode;
 
-
 public class Weapon {
 
-    private int x;
-    private int y;
-    private double rotation;
-    private String imgPath = "src/resources/mg.png";
+    private int currentWeapon = 0;
+    private double[] rotation = {0, 48};
+    private int[] offset = {0, 24};
+    private String[] imgPath = {null, "src/resources/mg.png"};
+    private int[] maxShoots = {20, 200};
+    private int currentShoot = 200;
+    private int[] bulletOffset = {24, 40};
+    private double[] bulletRotationOffset = {35, 23};
 
-    // public Weapon(int x, int y, double rotation) {
-    //     this.x = x;
-    //     this.y = y;
-    //     this.rotation = rotation;
-    // }
-    public int getX() {
-        return x;
+    public void setCurrentWeapon(int currentWeapon) {
+        this.currentWeapon = currentWeapon;
+        currentShoot = maxShoots[currentWeapon];
     }
 
-    public void setX(int x) {
-        this.x = x;
-    }
-
-    public int getY() {
-        return y;
-    }
-
-    public void setY(int y) {
-        this.y = y;
+    public int getOffset() {
+        return offset[currentWeapon];
     }
 
     public double getRotation() {
-        return rotation;
+        return rotation[currentWeapon];
     }
 
     public String getImgPath() {
-        return imgPath;
+        return imgPath[currentWeapon];
+    }
+
+    public int getMaxShoots() {
+        return maxShoots[currentWeapon];
+    }
+
+    public int getCurrentShoot() {
+        return currentShoot;
+    }
+
+    public void setCurrentShoot(int currentShoot) {
+        this.currentShoot = currentShoot;
+    }
+
+    public int getBulletOffset() {
+        return bulletOffset[currentWeapon];
+    }
+
+    public double getBulletRotationOffset() {
+        return bulletRotationOffset[currentWeapon];
     }
 }

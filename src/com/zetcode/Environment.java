@@ -12,7 +12,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
-import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 import javax.imageio.ImageIO;
@@ -47,14 +46,11 @@ public class Environment extends JPanel implements ActionListener  {
     private boolean inGame = true;
 
     private int maxEnemys = 3;
-    // private int[][] spawnPoints = {{-0,-0},{500,-0},{0,500},{500,500},{0,250},{250,0},{250,500},{500,250}};
     private int[][] defaultSpawnPoints = {{0,0},{B_WIDTH,0},{0,B_HEIGHT},{B_WIDTH,B_HEIGHT},{0,(int)(B_HEIGHT*0.5)},{(int)(B_WIDTH*0.5),0},{(int)(B_WIDTH*0.5),B_HEIGHT},{B_WIDTH,(int)(B_HEIGHT*0.5)}};
     private int mX;
     private int mY;
     private int counter = 0;
     private int kills = 0;
-    private int maxShoots = 20;
-    private int shoots = maxShoots;
     private int highscore;
     private boolean highscoreCheck = false;
     private double chanceForGrande = 0.25;
@@ -95,6 +91,7 @@ public class Environment extends JPanel implements ActionListener  {
 
     private void initGame() {
         player = new Character(B_WIDTH/2, B_HEIGHT/2, 0);
+        player.isPlayer = true;
         try {
             xPlayerCenterOffset = (int) (ImageIO.read(new File("src/resources/player.gif")).getWidth()*0.5);
             yPlayerCenterOffset = (int) (ImageIO.read(new File("src/resources/player.gif")).getHeight()*0.5);
@@ -168,14 +165,13 @@ public class Environment extends JPanel implements ActionListener  {
 
     private void DrawWeapon(Graphics g)
     {
-        if (inGame) {
+        if (inGame && weapon.getImgPath() != null) {
             try {
                 BufferedImage originalImage = ImageIO.read(new File(weapon.getImgPath()));
                 BufferedImage subImage = rotateImage(originalImage, player.rotation);
 
-                int offset = 24;
-                int drawXPos = player.x-(int)(originalImage.getWidth()*0.5) + (int)xPlayerCenterOffset + (int)(offset*Math.sin(Math.toRadians((-1*player.rotation + 48))));
-                int drawYPos = player.y-(int)(originalImage.getHeight()*0.5) + (int)yPlayerCenterOffset + (int)(offset*Math.sin(Math.toRadians(90-(-1*player.rotation+ 48))));
+                int drawXPos = player.x-(int)(originalImage.getWidth()*0.5) + (int)xPlayerCenterOffset + (int)(weapon.getOffset()*Math.sin(Math.toRadians((-1*player.rotation + weapon.getRotation()))));
+                int drawYPos = player.y-(int)(originalImage.getHeight()*0.5) + (int)yPlayerCenterOffset + (int)(weapon.getOffset()*Math.sin(Math.toRadians(90-(-1*player.rotation+ weapon.getRotation()))));
                 g.drawImage(subImage, drawXPos, drawYPos, this);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -336,6 +332,8 @@ public class Environment extends JPanel implements ActionListener  {
                 }
             }
 
+            DrawSpawnpoints(g);
+
             try {
                 Point mousPos = MouseInfo.getPointerInfo().getLocation();
                 mX = (int) mousPos.getX();
@@ -356,11 +354,10 @@ public class Environment extends JPanel implements ActionListener  {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            DrawSpawnpoints(g);
             DrawEnemys(g);
             DrawGrandes(g);
             DrawBullets(g);
-            // DrawWeapon(g);
+            DrawWeapon(g);
             DrawExplosions(g);
 
             String killsText = "kills: " + kills;
@@ -371,9 +368,9 @@ public class Environment extends JPanel implements ActionListener  {
             g.setColor(Color.yellow);
             g.setFont(small);
             g.drawString(killsText, (B_WIDTH - metr.stringWidth(killsText)) / 2, 20);
-            if (shoots > 0)
+            if (weapon.getCurrentShoot() > 0)
             {
-                shotsText = "shots: " + shoots;
+                shotsText = "shots: " + weapon.getCurrentShoot();
                 g.setColor(Color.white);
             }
             else
@@ -441,7 +438,8 @@ public class Environment extends JPanel implements ActionListener  {
     private void SetDefault()
     {
         kills = 0;
-        shoots = maxShoots;
+        weapon = new Weapon();
+        weapon.setCurrentShoot(weapon.getMaxShoots());
         player.x = B_WIDTH/2;
         player.x = B_HEIGHT/2;
         bullets.clear();
@@ -454,7 +452,6 @@ public class Environment extends JPanel implements ActionListener  {
         inGame = true;
         highscoreCheck = false;
         maxEnemys = 9;
-        weapon = new Weapon();
         for (int[] spawnPoint : defaultSpawnPoints) {
             spawnPoints.add(new Spawnpoint(spawnPoint[0], spawnPoint[1]));
         }
@@ -512,14 +509,14 @@ public class Environment extends JPanel implements ActionListener  {
 
     private void Shoot()
     {
-        if (shoots > 0)
+        if (weapon.getCurrentShoot() > 0)
         {
             Bullet bullet = new Bullet(player.x + xPlayerCenterOffset, player.y + yPlayerCenterOffset, player.rotation*-1);
             bullets.add(bullet);
-            shoots--;
+            weapon.setCurrentShoot(weapon.getCurrentShoot()-1);
 
-            bullet.y += (-24*Math.sin(Math.toRadians(bullet.rotation-35)));
-            bullet.x += (24*Math.sin(Math.toRadians(90-bullet.rotation+35)));
+            bullet.y += (-weapon.getBulletOffset()*Math.sin(Math.toRadians(bullet.rotation-weapon.getBulletRotationOffset())));
+            bullet.x += (weapon.getBulletOffset()*Math.sin(Math.toRadians(90-bullet.rotation+weapon.getBulletRotationOffset())));
         }
     }
 
@@ -558,8 +555,16 @@ public class Environment extends JPanel implements ActionListener  {
 
     private void SpawnGrandes(Character thrower)
     {
-        Grande newGrande = new Grande(thrower.x, thrower.y, thrower.rotation*-1-90);
-        grandes.add(newGrande);
+        if (thrower.isPlayer)
+        {
+            Grande newGrande = new Grande(thrower.x+xPlayerCenterOffset, thrower.y+yPlayerCenterOffset, thrower.rotation*-1);
+            grandes.add(newGrande);
+        }
+        else
+        {
+            Grande newGrande = new Grande(thrower.x, thrower.y, thrower.rotation*-1-90);
+            grandes.add(newGrande);
+        }
     }
 
     private void SpawnExplosion(Grande grande)
@@ -695,11 +700,18 @@ public class Environment extends JPanel implements ActionListener  {
             if ((key == KeyEvent.VK_G)) {
                 SpawnGrandes(player);
             }
+            if ((key == KeyEvent.VK_1)) {
+                weapon.setCurrentWeapon(0);
+            }
+
+            if ((key == KeyEvent.VK_2)) {
+                weapon.setCurrentWeapon(1);
+            }
 
             if (inGame)
             {
                 if ((key == KeyEvent.VK_R)) {
-                    shoots = maxShoots;
+                    weapon.setCurrentShoot(weapon.getMaxShoots());
                 }
             }
             else
@@ -730,7 +742,7 @@ public class Environment extends JPanel implements ActionListener  {
                 Shoot();
             }
             if (e.getButton() == MouseEvent.BUTTON3 && inGame) {
-                shoots = maxShoots;
+                weapon.setCurrentShoot(weapon.getMaxShoots());
             }
         }
 
