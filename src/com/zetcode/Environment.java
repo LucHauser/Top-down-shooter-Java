@@ -109,6 +109,7 @@ public class Environment extends JPanel implements ActionListener  {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        dimondSpawner = new DimondSpawner(this);
         SetDefault();
     }
 
@@ -497,7 +498,6 @@ public class Environment extends JPanel implements ActionListener  {
         kills = 0;
         getAndSaveData(1, true);
         weapon = new Weapon();
-        dimondSpawner = new DimondSpawner(this);
         weapon.setCurrentShoot(weapon.getMaxShoots());
         player.x = B_WIDTH/2;
         player.x = B_HEIGHT/2;

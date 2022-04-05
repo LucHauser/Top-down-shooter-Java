@@ -29,6 +29,4 @@ public class Spawnpoint {
     public void setCanSpawn(boolean canSpawn) {
         this.canSpawn = canSpawn;
     }
-
-    
 }
