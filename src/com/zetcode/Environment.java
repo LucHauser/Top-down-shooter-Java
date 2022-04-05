@@ -12,11 +12,14 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+import java.util.Scanner;
 import java.util.concurrent.ThreadLocalRandom;
 
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 import javax.swing.Timer;
+
+import org.w3c.dom.TypeInfo;
 
 import java.awt.event.MouseEvent;
 
@@ -65,6 +68,7 @@ public class Environment extends JPanel implements ActionListener  {
     private int dimondCollectDistance = 25;
     private int currentDiamonds = 0;
     private int price = 20;
+    private int bought;
 
     private ArrayList<Bullet> bullets = new ArrayList<Bullet>();
     private ArrayList<Character> enemys = new ArrayList<Character>();
@@ -446,10 +450,10 @@ public class Environment extends JPanel implements ActionListener  {
         if (!this.highscoreCheck)
         {
             this.highscoreCheck = true;
-            highscore = SaveScore(kills);
+            getAndSaveData(0, false);
         }
         String dimondsText = "Diamonds: " + currentDiamonds;
-        SaveDiamonds();
+        getAndSaveData(1, false);
         String highscoreText = "HIGHSCORE: " + highscore;
         String restartText = "Press R to restart";
         String exitText = "Press X to exit the game";
@@ -486,16 +490,12 @@ public class Environment extends JPanel implements ActionListener  {
         g.drawString(priceText, (B_WIDTH - midlemetrs.stringWidth(priceText)+70) / 2, B_HEIGHT / 2 + 45);
         g.setColor(new Color(255, 164, 94));
         g.drawString(buyText, (B_WIDTH - midlemetrs.stringWidth(buyText)+100) / 2, B_HEIGHT / 2 + 100);
-        if (isBought())
-        {
-            System.out.println("Ndsjfd");
-        }
     }
 
     private void SetDefault()
     {
         kills = 0;
-        currentDiamonds = getDimonds();
+        getAndSaveData(1, true);
         weapon = new Weapon();
         dimondSpawner = new DimondSpawner(this);
         weapon.setCurrentShoot(weapon.getMaxShoots());
@@ -520,123 +520,83 @@ public class Environment extends JPanel implements ActionListener  {
         }
     }
 
-    int getDimonds()
+
+    void getAndSaveData(int index, boolean read)
     {
-        File diamondFile = new File(System.getProperty("user.dir") + "\\src\\resources\\diamond.txt");
+        File stateFile = new File(System.getProperty("user.dir") + "\\src\\resources\\state.txt");
         try{
-            if(!diamondFile.exists()){
-                diamondFile.createNewFile();
-                BufferedWriter wirter = new BufferedWriter(new FileWriter(diamondFile));
-                wirter.write("0");
+            if(!stateFile.exists()){
+                stateFile.createNewFile();
+                BufferedWriter wirter = new BufferedWriter(new FileWriter(stateFile));
+                //highscore;diamonds;gun
+                wirter.write("0;0;0");
                 wirter.close();
-                return 0;
             }
         } catch(IOException e){
             System.out.println("Error: "+e);
         }
 
-        BufferedReader reader = null;
+        BufferedWriter wirter = null;
+        ArrayList<Integer> values = new ArrayList<Integer>();
 
-        try{
-            reader = new BufferedReader(new FileReader(diamondFile));
-            String currentLine = reader.readLine();
-
-            return Integer.parseInt(currentLine);
-        } catch(IOException e){
-            System.out.println("Error: "+e);
-        } finally
-        {
-            try {
-                reader.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return 0;
-    }
-
-    boolean isBought()
-    {
-        File bFile = new File(System.getProperty("user.dir") + "\\src\\resources\\b");
-        if(bFile.exists()){return true;}
-        else{return false;}
-    }
-
-    void buy()
-    {
-        File bFile = new File(System.getProperty("user.dir") + "\\src\\resources\\b");
         try {
-            bFile.createNewFile();
+            values = getValues(stateFile);
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    private void SaveDiamonds()
-    {
-        File diamondFile = new File(System.getProperty("user.dir") + "\\src\\resources\\diamond.txt");
-        BufferedWriter wirter = null;
 
         try{
-            wirter = new BufferedWriter(new FileWriter(diamondFile));
-            wirter.write(Integer.valueOf(currentDiamonds).toString());
-        } catch(IOException e){
-            System.out.println("Error: "+e);
-        } finally
-        {
-            try {
-                wirter.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    int SaveScore(Integer score)
-    {
-        File scoreFile = new File(System.getProperty("user.dir") + "\\src\\resources\\score.txt");
-        try{
-            if(!scoreFile.exists()){
-                scoreFile.createNewFile();
-                BufferedWriter wirter = new BufferedWriter(new FileWriter(scoreFile));
-                wirter.write("0");
-                wirter.close();
-            }
-        } catch(IOException e){
-            System.out.println("Error: "+e);
-        }
-
-        BufferedReader reader = null;
-        BufferedWriter wirter = null;
-
-        try{
-            reader = new BufferedReader(new FileReader(scoreFile));
-            String currentLine = reader.readLine();
-
-            wirter = new BufferedWriter(new FileWriter(scoreFile));
-
-            Integer highscore = Integer.parseInt(currentLine);
-
-            if (highscore > score)
+            if (index == 0)
             {
-                wirter.write(highscore.toString());
-                return highscore;
-            } else {
-                wirter.write(score.toString());
-                return score;
+                Integer SavedHighscore = values.get(index);
+
+                if (SavedHighscore < kills)
+                {
+                    wirter = new BufferedWriter(new FileWriter(stateFile));
+                    wirter.write(Integer.valueOf(kills).toString() + ";" + Integer.valueOf(values.get(1)).toString() + ";" + Integer.valueOf(values.get(2)).toString());
+                    wirter.close();
+                    highscore = kills;
+                }
+                else
+                {
+                    highscore = SavedHighscore;
+                }
+            }
+
+            if (index == 1)
+            {
+                if (read) {currentDiamonds = values.get(index);}
+                else{
+                    wirter = new BufferedWriter(new FileWriter(stateFile));
+                    wirter.write(Integer.valueOf(values.get(0)).toString() + ";" +  Integer.valueOf(currentDiamonds).toString() + ";" + Integer.valueOf(values.get(2)).toString());
+                    wirter.close();
+                }
+            }
+
+            if (index == 2)
+            {
+                if (read) {bought = values.get(index);}
+                else{
+                    wirter = new BufferedWriter(new FileWriter(stateFile));
+                    wirter.write(Integer.valueOf(values.get(0)).toString() + ";" + Integer.valueOf(values.get(1)).toString() + ";" + "1");
+                    wirter.close();
+                }
             }
         } catch(IOException e){
             System.out.println("Error: "+e);
-        } finally
-        {
-            try {
-                reader.close();
-                wirter.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
-        return 0;
+        // System.exit(0);
+    }
+
+    public ArrayList<Integer> getValues(File file) throws IOException{
+        Scanner scanner = new Scanner(file);
+        String[] tokens = scanner.nextLine().split(";");
+        ArrayList<Integer> values = new ArrayList<Integer>();
+        for (String value : tokens) {
+            values.add(Integer.parseInt(value));
+        }
+        scanner.close();
+        return values;
     }
 
     private void Shoot()
@@ -827,10 +787,6 @@ public class Environment extends JPanel implements ActionListener  {
                 if (canPlayerMoveToThisPosition(player.x, player.y + DOT_SIZE)) {player.y += DOT_SIZE;}
             }
 
-            // if ((key == KeyEvent.VK_SPACE)) {
-            //     Shoot();
-            // }
-
             if ((key == KeyEvent.VK_X)) {
                 System.exit(0);
             }
@@ -842,7 +798,8 @@ public class Environment extends JPanel implements ActionListener  {
                 weapon.setCurrentWeapon(0);
             }
 
-            if ((key == KeyEvent.VK_2) && isBought()) {
+            getAndSaveData(2, true);
+            if ((key == KeyEvent.VK_2) && bought == 1) {
                 weapon.setCurrentWeapon(1);
             }
 
@@ -858,11 +815,12 @@ public class Environment extends JPanel implements ActionListener  {
                     SetDefault();
                 }
 
-                if ((key == KeyEvent.VK_B) && currentDiamonds >= price && !isBought())
+                getAndSaveData(2, true);
+                if ((key == KeyEvent.VK_B) && currentDiamonds >= price && bought == 0)
                 {
                     currentDiamonds -= price;
-                    SaveDiamonds();
-                    buy();
+                    getAndSaveData(1, false);
+                    getAndSaveData(2, false);
                 }
             }
         }
