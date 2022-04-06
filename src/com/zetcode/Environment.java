@@ -19,19 +19,15 @@ import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
-import org.w3c.dom.TypeInfo;
-
 import java.awt.event.MouseEvent;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.awt.Rectangle;
 import java.awt.MouseInfo;
 import java.awt.Point;
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.awt.event.MouseListener;
