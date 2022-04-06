@@ -7,7 +7,7 @@ public class Weapon {
     private int[] offset = {0, 24};
     private String[] imgPath = {null, "src/resources/mg.png"};
     private int[] maxShoots = {20, 200};
-    private int currentShoot = 200;
+    private int[] currentShoot = {20, 200};
     private int[] bulletOffset = {24, 40};
     private double[] bulletRotationOffset = {35, 23};
     private boolean[] isFUllauto = {false, true};
@@ -19,7 +19,7 @@ public class Weapon {
 
     public void setCurrentWeapon(int currentWeapon) {
         this.currentWeapon = currentWeapon;
-        currentShoot = maxShoots[currentWeapon];
+        if (isReloadable[currentWeapon]){currentShoot[currentWeapon] = maxShoots[currentWeapon];}
     }
 
     public int getOffset() {
@@ -38,16 +38,22 @@ public class Weapon {
         return maxShoots[currentWeapon];
     }
 
-    public void setMaxShoots(int shots) {
-        this.maxShoots[1] = shots;
-    }
-
     public int getCurrentShoot() {
-        return currentShoot;
+        return currentShoot[currentWeapon];
     }
 
     public void setCurrentShoot(int currentShoot) {
-        this.currentShoot = currentShoot;
+        this.currentShoot[currentWeapon] = currentShoot;
+    }
+
+    public void loadShotsToNotReloadble(int index, int shots)
+    {
+        currentShoot[index] = shots;
+    }
+
+    public int saveShots(int index)
+    {
+        return currentShoot[index];
     }
 
     public int getBulletOffset() {
@@ -62,11 +68,33 @@ public class Weapon {
         return isFUllauto[currentWeapon];
     }
 
+    public void shot()
+    {
+        if (canShot()){currentShoot[currentWeapon]--;}
+    }
+
+    public boolean canShot()
+    {
+        if (currentShoot[currentWeapon] > 0)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
     public void reload()
     {
         if (isReloadable[currentWeapon])
         {
-            currentShoot = maxShoots[currentWeapon];
+            currentShoot[currentWeapon] = maxShoots[currentWeapon];
         }
+    }
+
+    public void collectMunition(int index, int plus)
+    {
+        currentShoot[index] += plus;
     }
 }

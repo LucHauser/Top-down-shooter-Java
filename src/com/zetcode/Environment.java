@@ -56,7 +56,7 @@ public class Environment extends JPanel implements ActionListener  {
     private int counter = 0;
     private int kills = 0;
     private int highscore;
-    private boolean highscoreCheck = false;
+    private boolean savedData = false;
     private double chanceForGrande = 0.25;
     private int throwDistance = 400;
     private Weapon weapon;
@@ -110,6 +110,7 @@ public class Environment extends JPanel implements ActionListener  {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        weapon = new Weapon();
         collactableSpawner = new CollactbleSpawner(this);
         SetDefault();
     }
@@ -402,6 +403,7 @@ public class Environment extends JPanel implements ActionListener  {
             for (Collactable munition : munitionToDestroy) {
                 diamonds.remove(munition);
             }
+            checkMunitionCollsison(g);
 
             String killsText = "kills: " + kills;
             String shotsText = "";
@@ -412,7 +414,7 @@ public class Environment extends JPanel implements ActionListener  {
             g.setColor(Color.yellow);
             g.setFont(small);
             g.drawString(killsText, (B_WIDTH - metr.stringWidth(killsText)) / 2, 20);
-            if (weapon.getCurrentShoot() > 0)
+            if (weapon.canShot())
             {
                 shotsText = "shots: " + weapon.getCurrentShoot();
                 g.setColor(Color.white);
@@ -470,14 +472,14 @@ public class Environment extends JPanel implements ActionListener  {
 
         String msg = "Game Over";
         String score = "SCORE: " + kills;
-        if (!this.highscoreCheck)
+        if (!savedData)
         {
-            this.highscoreCheck = true;
+            savedData = true;
             getAndSaveData(0, false);
+            getAndSaveData(1, false);
+            getAndSaveData(3, false);
         }
-        getAndSaveData(0, false);
         String dimondsText = "Diamonds: " + currentDiamonds;
-        getAndSaveData(1, false);
         String highscoreText = "HIGHSCORE: " + highscore;
         String restartText = "Press R to restart";
         String exitText = "Press X to exit the game";
@@ -514,15 +516,14 @@ public class Environment extends JPanel implements ActionListener  {
         g.drawString(priceText, (B_WIDTH - midlemetrs.stringWidth(priceText)+70) / 2, B_HEIGHT / 2 + 45);
         g.setColor(new Color(255, 164, 94));
         g.drawString(buyText, (B_WIDTH - midlemetrs.stringWidth(buyText)+100) / 2, B_HEIGHT / 2 + 100);
-        getAndSaveData(3, false);
     }
 
     private void SetDefault()
     {
         kills = 0;
         getAndSaveData(1, true);
-        weapon = new Weapon();
-        weapon.setCurrentShoot(weapon.getMaxShoots());
+        getAndSaveData(3, true);
+        weapon.reload();;
         player.x = B_WIDTH/2;
         player.x = B_HEIGHT/2;
         bullets.clear();
@@ -535,7 +536,7 @@ public class Environment extends JPanel implements ActionListener  {
         Character fEnemy = new Character(100, B_WIDTH/2, -90);
         enemys.add(fEnemy);
         inGame = true;
-        highscoreCheck = false;
+        savedData = false;
         maxEnemys = 9;
         getAndSaveData(2, true);
         for (int[] spawnPoint : defaultSpawnPoints) {
@@ -562,79 +563,12 @@ public class Environment extends JPanel implements ActionListener  {
                 }
                 cIndex++;
             }
-            System.out.println(newValue);
             writer.write(newValue);
             writer.close();
         } catch(IOException e){
             System.out.println("Error: "+e);
         }
     }
-
-    // void getAndSaveData(int index, boolean read)
-    // {
-    //     File stateFile = new File(System.getProperty("user.dir") + "\\src\\resources\\state.txt");
-    //     try{
-    //         if(!stateFile.exists()){
-    //             stateFile.createNewFile();
-    //             BufferedWriter wirter = new BufferedWriter(new FileWriter(stateFile));
-    //             //highscore;diamonds;gun/ammo
-    //             wirter.write("0;0;0;0");
-    //             wirter.close();
-    //         }
-    //     } catch(IOException e){
-    //         System.out.println("Error: "+e);
-    //     }
-
-    //     ArrayList<Integer> values = new ArrayList<Integer>();
-
-    //     try {
-    //         values = getValues(stateFile);
-    //     } catch (IOException e) {
-    //         e.printStackTrace();
-    //     }
-
-    //     switch (index) {
-    //         case 0:
-    //             Integer SavedHighscore = values.get(index);
-    //             if (SavedHighscore < kills)
-    //             {
-    //                 saveToFile(values, kills, index, stateFile);
-    //                 highscore = kills;
-    //             }
-    //             else
-    //             {
-    //                 highscore = SavedHighscore;
-    //             }
-    //             System.out.println("Highscore");
-    //             break;
-    //         case 1:
-    //             if (read) {currentDiamonds = values.get(index);}
-    //             else{
-    //                 saveToFile(values, currentDiamonds, index, stateFile);
-    //             }
-    //             System.out.println("Diamonds");
-    //             break;
-    //         case 2:
-    //             if (read) {bought = values.get(index);}
-    //             else{
-    //                 saveToFile(values, 1, index, stateFile);
-    //             }
-    //             break;
-    //         case 3:
-    //             if (values.get(2) == 1)
-    //             {
-    //                 if (read) {weapon.setMaxShoots(values.get(index));}
-    //                 else{
-    //                     saveToFile(values, weapon.getCurrentShoot(), index, stateFile);
-    //                 }
-    //                 System.out.println("shoots");
-    //             }
-    //             break;
-    //         default:
-    //             System.out.println("Error with switch");
-    //             break;
-    //     }
-    // }
 
     void getAndSaveData(int index, boolean read)
     {
@@ -658,26 +592,25 @@ public class Environment extends JPanel implements ActionListener  {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.out.println(index);
+
         switch (index) {
             case 0:
                 Integer SavedHighscore = values.get(index);
                 if (SavedHighscore < kills)
                 {
                     values.set(index, kills);
+                    highscore = kills;
                 }
                 else
                 {
                     highscore = SavedHighscore;
                 }
-                System.out.println("Highscore");
                 break;
             case 1:
                 if (read) {currentDiamonds = values.get(index);}
                 else{
                     values.set(index, currentDiamonds);
                 }
-                System.out.println("Diamonds");
                 break;
             case 2:
                 if (read) {bought = values.get(index);}
@@ -688,18 +621,16 @@ public class Environment extends JPanel implements ActionListener  {
             case 3:
                 if (values.get(2) == 1)
                 {
-                    if (read) {weapon.setMaxShoots(values.get(index));}
+                    if (read) {weapon.loadShotsToNotReloadble(1, values.get(index));}
                     else{
-                        values.set(index, weapon.getCurrentShoot());
+                        values.set(index, weapon.saveShots(1));
                     }
-                    System.out.println("shoots");
                 }
                 break;
             default:
                 System.out.println("Error with switch");
                 break;
         }
-        // System.out.println(values);
         saveToFile(values, stateFile);
     }
 
@@ -716,11 +647,12 @@ public class Environment extends JPanel implements ActionListener  {
 
     private void Shoot()
     {
-        if (weapon.getCurrentShoot() > 0)
+        if (weapon.canShot())
         {
             Bullet bullet = new Bullet(player.x + xPlayerCenterOffset, player.y + yPlayerCenterOffset, player.rotation*-1);
             bullets.add(bullet);
-            weapon.setCurrentShoot(weapon.getCurrentShoot()-1);
+
+            weapon.shot();
 
             bullet.y += (-weapon.getBulletOffset()*Math.sin(Math.toRadians(bullet.rotation-weapon.getBulletRotationOffset())));
             bullet.x += (weapon.getBulletOffset()*Math.sin(Math.toRadians(90-bullet.rotation+weapon.getBulletRotationOffset())));
@@ -822,6 +754,26 @@ public class Environment extends JPanel implements ActionListener  {
         }
     }
 
+    private void checkMunitionCollsison(Graphics g)
+    {
+        Sprite playeSprite = new Sprite(player.x+xPlayerCenterOffset, player.y+yPlayerCenterOffset, "src/resources/player.gif");
+        Rectangle playerRect = playeSprite.getBounds();
+        ArrayList<Collactable> toDeleteMunitions = new ArrayList<Collactable>();
+        for (Collactable muniton : munitions) {
+            Sprite munitionSprite = new Sprite(muniton.getX(), muniton.getY(), "src/resources/munition.png");
+
+            Rectangle munitionRect = munitionSprite.getBounds();
+            if (munitionRect.intersects(playerRect)) {
+                toDeleteMunitions.add(muniton);
+                weapon.collectMunition(1, 100);
+            }
+        }
+
+        for (Collactable munition : toDeleteMunitions) {
+            munitions.remove(munition);
+        }
+    }
+
     private void checkBulletCollison()
     {
         ArrayList<Bullet> toDeleteBullets = new ArrayList<Bullet>();
@@ -914,10 +866,8 @@ public class Environment extends JPanel implements ActionListener  {
                 weapon.setCurrentWeapon(0);
             }
 
-            getAndSaveData(3, true);
             if ((key == KeyEvent.VK_2) && bought == 1) {
                 weapon.setCurrentWeapon(1);
-                getAndSaveData(3, true);
             }
 
             if (inGame)
