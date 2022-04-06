@@ -1,10 +1,10 @@
 package com.zetcode;
 
-public class Diamond {
+public class Collactable {
     private int x;
     private int y;
 
-    public Diamond(int x, int y) {
+    public Collactable(int x, int y) {
         this.x = x;
         this.y = y;
     }

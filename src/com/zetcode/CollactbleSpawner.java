@@ -4,14 +4,14 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class DimondSpawner {
+public class CollactbleSpawner {
 
     private int[] spawnRange = {5,25};
     private Environment env;
     private ThreadLocalRandom tlr = ThreadLocalRandom.current();
     Timer timer = new Timer(true);
 
-    public DimondSpawner(Environment environment) {
+    public CollactbleSpawner(Environment environment) {
         this.env = environment;
         SpawnDimond();
     }
@@ -27,7 +27,7 @@ public class DimondSpawner {
             this.delay = delay;
         }
         public void run(){
-            env.SpawnDiamond();
+            env.SpawnCollactable();
             try {
                 Thread.sleep(delay);
             } catch (InterruptedException ex) {

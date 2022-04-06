@@ -64,7 +64,7 @@ public class Environment extends JPanel implements ActionListener  {
     private double spawnDistance = 100;
     private int maxNewSpawnpoints = 3;
     private int maxDimonds = 4;
-    private DimondSpawner dimondSpawner = null;
+    private CollactbleSpawner collactableSpawner = null;
     private int dimondCollectDistance = 25;
     private int currentDiamonds = 0;
     private int price = 20;
@@ -76,7 +76,8 @@ public class Environment extends JPanel implements ActionListener  {
     private ArrayList<Grande> grandes = new ArrayList<Grande>();
     private ArrayList<Explosion> explosions = new ArrayList<Explosion>();
     private ArrayList<Spawnpoint> spawnPoints = new ArrayList<Spawnpoint>();
-    private ArrayList<Diamond> diamonds = new ArrayList<Diamond>();
+    private ArrayList<Collactable> diamonds = new ArrayList<Collactable>();
+    private ArrayList<Collactable> munitions = new ArrayList<Collactable>();
 
     public Environment() {
 
@@ -109,7 +110,7 @@ public class Environment extends JPanel implements ActionListener  {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        dimondSpawner = new DimondSpawner(this);
+        collactableSpawner = new CollactbleSpawner(this);
         SetDefault();
     }
 
@@ -373,8 +374,8 @@ public class Environment extends JPanel implements ActionListener  {
             DrawExplosions(g);
 
             Image dimondImg= Toolkit.getDefaultToolkit().getImage("src\\resources\\dimond.png");
-            ArrayList<Diamond> diamondsToDestroy = new ArrayList<Diamond>();
-            for (Diamond diamond : diamonds) {
+            ArrayList<Collactable> diamondsToDestroy = new ArrayList<Collactable>();
+            for (Collactable diamond : diamonds) {
                 g.drawImage(dimondImg, diamond.getX()-(int)(dimondImg.getWidth(null)*0.5), diamond.getY()-(int)(dimondImg.getHeight(null)*0.5), null);
                 if (getDistance(player.x+xPlayerCenterOffset, player.y+yPlayerCenterOffset, diamond.getX(), diamond.getY()) <= dimondCollectDistance)
                 {
@@ -383,8 +384,23 @@ public class Environment extends JPanel implements ActionListener  {
                 }
             }
 
-            for (Diamond dimond : diamondsToDestroy) {
+            for (Collactable dimond : diamondsToDestroy) {
                 diamonds.remove(dimond);
+            }
+
+            Image munitionImg= Toolkit.getDefaultToolkit().getImage("src\\resources\\munition.png");
+            ArrayList<Collactable> munitionToDestroy = new ArrayList<Collactable>();
+            for (Collactable munition : munitions) {
+                g.drawImage(munitionImg, munition.getX()-(int)(munitionImg.getWidth(null)*0.5), munition.getY()-(int)(munitionImg.getHeight(null)*0.5), null);
+                if (getDistance(player.x+xPlayerCenterOffset, player.y+yPlayerCenterOffset, munition.getX(), munition.getY()) <= dimondCollectDistance)
+                {
+                    diamondsToDestroy.add(munition);
+                    currentDiamonds++;
+                }
+            }
+
+            for (Collactable munition : munitionToDestroy) {
+                diamonds.remove(munition);
             }
 
             String killsText = "kills: " + kills;
@@ -421,12 +437,18 @@ public class Environment extends JPanel implements ActionListener  {
         }
     }
 
-    public void SpawnDiamond()
+    public void SpawnCollactable()
     {
-        if (diamonds.size() <= maxDimonds)
+        getAndSaveData(2, true);
+        if (bought == 1)
         {
             ThreadLocalRandom tlr = ThreadLocalRandom.current();
-            diamonds.add(new Diamond(tlr.nextInt(100, B_WIDTH-100), tlr.nextInt(100, B_HEIGHT-100)));
+            munitions.add(new Collactable(tlr.nextInt(100, B_WIDTH-100), tlr.nextInt(100, B_HEIGHT-100)));
+        }
+        else if (diamonds.size() <= maxDimonds)
+        {
+            ThreadLocalRandom tlr = ThreadLocalRandom.current();
+            diamonds.add(new Collactable(tlr.nextInt(100, B_WIDTH-100), tlr.nextInt(100, B_HEIGHT-100)));
         }
     }
 
@@ -453,6 +475,7 @@ public class Environment extends JPanel implements ActionListener  {
             this.highscoreCheck = true;
             getAndSaveData(0, false);
         }
+        getAndSaveData(0, false);
         String dimondsText = "Diamonds: " + currentDiamonds;
         getAndSaveData(1, false);
         String highscoreText = "HIGHSCORE: " + highscore;
@@ -491,6 +514,7 @@ public class Environment extends JPanel implements ActionListener  {
         g.drawString(priceText, (B_WIDTH - midlemetrs.stringWidth(priceText)+70) / 2, B_HEIGHT / 2 + 45);
         g.setColor(new Color(255, 164, 94));
         g.drawString(buyText, (B_WIDTH - midlemetrs.stringWidth(buyText)+100) / 2, B_HEIGHT / 2 + 100);
+        getAndSaveData(3, false);
     }
 
     private void SetDefault()
@@ -507,11 +531,13 @@ public class Environment extends JPanel implements ActionListener  {
         explosions.clear();
         spawnPoints.clear();
         diamonds.clear();
+        munitions.clear();
         Character fEnemy = new Character(100, B_WIDTH/2, -90);
         enemys.add(fEnemy);
         inGame = true;
         highscoreCheck = false;
         maxEnemys = 9;
+        getAndSaveData(2, true);
         for (int[] spawnPoint : defaultSpawnPoints) {
             spawnPoints.add(new Spawnpoint(spawnPoint[0], spawnPoint[1]));
         }
@@ -520,6 +546,95 @@ public class Environment extends JPanel implements ActionListener  {
         }
     }
 
+    void saveToFile(ArrayList<Integer> values, File stateFile)
+    {
+        try
+        {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(stateFile));
+            String newValue = "";
+            int cIndex = 0;
+            for (Integer value : values) {
+                newValue += Integer.valueOf(value).toString();
+
+                if (values.size()-1 != cIndex)
+                {
+                    newValue += ";";
+                }
+                cIndex++;
+            }
+            System.out.println(newValue);
+            writer.write(newValue);
+            writer.close();
+        } catch(IOException e){
+            System.out.println("Error: "+e);
+        }
+    }
+
+    // void getAndSaveData(int index, boolean read)
+    // {
+    //     File stateFile = new File(System.getProperty("user.dir") + "\\src\\resources\\state.txt");
+    //     try{
+    //         if(!stateFile.exists()){
+    //             stateFile.createNewFile();
+    //             BufferedWriter wirter = new BufferedWriter(new FileWriter(stateFile));
+    //             //highscore;diamonds;gun/ammo
+    //             wirter.write("0;0;0;0");
+    //             wirter.close();
+    //         }
+    //     } catch(IOException e){
+    //         System.out.println("Error: "+e);
+    //     }
+
+    //     ArrayList<Integer> values = new ArrayList<Integer>();
+
+    //     try {
+    //         values = getValues(stateFile);
+    //     } catch (IOException e) {
+    //         e.printStackTrace();
+    //     }
+
+    //     switch (index) {
+    //         case 0:
+    //             Integer SavedHighscore = values.get(index);
+    //             if (SavedHighscore < kills)
+    //             {
+    //                 saveToFile(values, kills, index, stateFile);
+    //                 highscore = kills;
+    //             }
+    //             else
+    //             {
+    //                 highscore = SavedHighscore;
+    //             }
+    //             System.out.println("Highscore");
+    //             break;
+    //         case 1:
+    //             if (read) {currentDiamonds = values.get(index);}
+    //             else{
+    //                 saveToFile(values, currentDiamonds, index, stateFile);
+    //             }
+    //             System.out.println("Diamonds");
+    //             break;
+    //         case 2:
+    //             if (read) {bought = values.get(index);}
+    //             else{
+    //                 saveToFile(values, 1, index, stateFile);
+    //             }
+    //             break;
+    //         case 3:
+    //             if (values.get(2) == 1)
+    //             {
+    //                 if (read) {weapon.setMaxShoots(values.get(index));}
+    //                 else{
+    //                     saveToFile(values, weapon.getCurrentShoot(), index, stateFile);
+    //                 }
+    //                 System.out.println("shoots");
+    //             }
+    //             break;
+    //         default:
+    //             System.out.println("Error with switch");
+    //             break;
+    //     }
+    // }
 
     void getAndSaveData(int index, boolean read)
     {
@@ -528,15 +643,14 @@ public class Environment extends JPanel implements ActionListener  {
             if(!stateFile.exists()){
                 stateFile.createNewFile();
                 BufferedWriter wirter = new BufferedWriter(new FileWriter(stateFile));
-                //highscore;diamonds;gun
-                wirter.write("0;0;0");
+                //highscore;diamonds;gun/ammo
+                wirter.write("0;0;0;0");
                 wirter.close();
             }
         } catch(IOException e){
             System.out.println("Error: "+e);
         }
 
-        BufferedWriter wirter = null;
         ArrayList<Integer> values = new ArrayList<Integer>();
 
         try {
@@ -544,48 +658,49 @@ public class Environment extends JPanel implements ActionListener  {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        try{
-            if (index == 0)
-            {
+        System.out.println(index);
+        switch (index) {
+            case 0:
                 Integer SavedHighscore = values.get(index);
-
                 if (SavedHighscore < kills)
                 {
-                    wirter = new BufferedWriter(new FileWriter(stateFile));
-                    wirter.write(Integer.valueOf(kills).toString() + ";" + Integer.valueOf(values.get(1)).toString() + ";" + Integer.valueOf(values.get(2)).toString());
-                    wirter.close();
-                    highscore = kills;
+                    values.set(index, kills);
                 }
                 else
                 {
                     highscore = SavedHighscore;
                 }
-            }
-
-            if (index == 1)
-            {
+                System.out.println("Highscore");
+                break;
+            case 1:
                 if (read) {currentDiamonds = values.get(index);}
                 else{
-                    wirter = new BufferedWriter(new FileWriter(stateFile));
-                    wirter.write(Integer.valueOf(values.get(0)).toString() + ";" +  Integer.valueOf(currentDiamonds).toString() + ";" + Integer.valueOf(values.get(2)).toString());
-                    wirter.close();
+                    values.set(index, currentDiamonds);
                 }
-            }
-
-            if (index == 2)
-            {
+                System.out.println("Diamonds");
+                break;
+            case 2:
                 if (read) {bought = values.get(index);}
                 else{
-                    wirter = new BufferedWriter(new FileWriter(stateFile));
-                    wirter.write(Integer.valueOf(values.get(0)).toString() + ";" + Integer.valueOf(values.get(1)).toString() + ";" + "1");
-                    wirter.close();
+                    values.set(index, 1);
                 }
-            }
-        } catch(IOException e){
-            System.out.println("Error: "+e);
+                break;
+            case 3:
+                if (values.get(2) == 1)
+                {
+                    if (read) {weapon.setMaxShoots(values.get(index));}
+                    else{
+                        values.set(index, weapon.getCurrentShoot());
+                    }
+                    System.out.println("shoots");
+                }
+                break;
+            default:
+                System.out.println("Error with switch");
+                break;
         }
-        // System.exit(0);
+        // System.out.println(values);
+        saveToFile(values, stateFile);
     }
 
     public ArrayList<Integer> getValues(File file) throws IOException{
@@ -758,7 +873,7 @@ public class Environment extends JPanel implements ActionListener  {
         return true;
     }
 
-    public void addDimond(Diamond d)
+    public void addDimond(Collactable d)
     {
         if (diamonds.size() >= maxDimonds) {return;}
         diamonds.add(d);
@@ -795,18 +910,20 @@ public class Environment extends JPanel implements ActionListener  {
                 SpawnGrandes(player);
             }
             if ((key == KeyEvent.VK_1)) {
+                getAndSaveData(3, false);
                 weapon.setCurrentWeapon(0);
             }
 
-            getAndSaveData(2, true);
+            getAndSaveData(3, true);
             if ((key == KeyEvent.VK_2) && bought == 1) {
                 weapon.setCurrentWeapon(1);
+                getAndSaveData(3, true);
             }
 
             if (inGame)
             {
                 if ((key == KeyEvent.VK_R)) {
-                    weapon.setCurrentShoot(weapon.getMaxShoots());
+                    weapon.reload();
                 }
             }
             else
@@ -849,7 +966,7 @@ public class Environment extends JPanel implements ActionListener  {
                 }
             }
             if (e.getButton() == MouseEvent.BUTTON3 && inGame) {
-                weapon.setCurrentShoot(weapon.getMaxShoots());
+                weapon.reload();
             }
         }
 

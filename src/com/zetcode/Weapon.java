@@ -11,6 +11,7 @@ public class Weapon {
     private int[] bulletOffset = {24, 40};
     private double[] bulletRotationOffset = {35, 23};
     private boolean[] isFUllauto = {false, true};
+    private boolean[] isReloadable = {true, false};
 
     public int getCurrentWeapon(){
         return currentWeapon;
@@ -37,6 +38,10 @@ public class Weapon {
         return maxShoots[currentWeapon];
     }
 
+    public void setMaxShoots(int shots) {
+        this.maxShoots[1] = shots;
+    }
+
     public int getCurrentShoot() {
         return currentShoot;
     }
@@ -55,5 +60,13 @@ public class Weapon {
 
     public boolean getIsFUllauto() {
         return isFUllauto[currentWeapon];
+    }
+
+    public void reload()
+    {
+        if (isReloadable[currentWeapon])
+        {
+            currentShoot = maxShoots[currentWeapon];
+        }
     }
 }
