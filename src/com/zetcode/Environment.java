@@ -882,6 +882,7 @@ public class Environment extends JPanel implements ActionListener  {
                 if ((key == KeyEvent.VK_B) && currentDiamonds >= price && bought == 0)
                 {
                     currentDiamonds -= price;
+                    weapon.collectMunition(1, 200);
                     getAndSaveData(1, false);
                     getAndSaveData(2, false);
                 }
